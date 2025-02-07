@@ -227,6 +227,10 @@ namespace differential_kinematics
             Eigen::VectorXd single_g;
             /* hesian and gradient should be linear sum */
             (*itr)->getHessianGradient(single_convergence, single_H, single_g, debug);
+            std::cout<<"qp_H size: "<<qp_H.size()<<std::endl;
+            std::cout<<"single_H size: "<<single_H.size()<<std::endl;
+            std::cout<<"qp_g size: "<<qp_g.size()<<std::endl;
+            std::cout<<"single_g size: "<<single_g.size()<<std::endl;
             qp_H += single_H;
             qp_g += single_g;
             convergence &= single_convergence;
@@ -239,11 +243,13 @@ namespace differential_kinematics
             solved_ = true;
             return true;
           }
-
+     
         /* step3: update Constaint Matrix and Bounds */
         size_t offset = 0;
+          std::cout<<"aaaa"<<std::endl;
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
+            std::cout<<"bbbb"<<std::endl;
             Eigen::MatrixXd single_A;
             Eigen::VectorXd single_lb;
             Eigen::VectorXd single_ub;
@@ -253,7 +259,8 @@ namespace differential_kinematics
                 ROS_ERROR("constraint: %s is invalid", (*itr)->getConstraintName().c_str());
                 return false;
               }
-
+          std::cout<<"single_lb: "<<single_lb.size()<<std::endl;
+            std::cout<<"qp_lb: "<<qp_lb.size()<<std::endl;
             /* for qpoasese */
             if((*itr)->directConstraint()) /* without constraint matrix */
               {
@@ -265,6 +272,7 @@ namespace differential_kinematics
 
                 for(size_t i = 0; i < qp_solver->getNV(); i++)
                   {
+           
                     if(single_lb(i) > qp_lb(i)) qp_lb(i) = single_lb(i);
                     if(single_ub(i) < qp_ub(i)) qp_ub(i) = single_ub(i);
                   }
@@ -277,6 +285,7 @@ namespace differential_kinematics
                 offset += (*itr)->getNc();
               }
           }
+           std::cout<<"cccc"<<std::endl;
         if(debug)
           {
             std::cout << "qp H \n" << qp_H << std::endl;
@@ -313,7 +322,7 @@ namespace differential_kinematics
             solved_ = true; //debug
             return false;
           }
-
+ std::cout<<"dddd"<<std::endl;
         Eigen::VectorXd delta_state_vector = Eigen::VectorXd::Zero(qp_solver->getNV());
         qp_solver->getPrimalSolution(delta_state_vector.data());
         if(debug)
@@ -337,8 +346,9 @@ namespace differential_kinematics
         for(size_t i = 0; i < robot_model_ptr_->getLinkJointIndices().size(); i++) target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i)) += delta_state_vector(i + 6);
 
         /* step6: update the kinematics by forward kinemtiacs, along with the modelling with current kinematics  */
+         std::cout<<"ffff"<<std::endl;
         modelUpdate();
-
+ std::cout<<"eeee"<<std::endl;
         if(debug)
           {
             ROS_WARN("finish loop %d", l);

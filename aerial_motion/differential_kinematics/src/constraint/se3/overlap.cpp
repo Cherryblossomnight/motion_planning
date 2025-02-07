@@ -68,6 +68,7 @@ namespace differential_kinematics
 
       bool getConstraint(Eigen::MatrixXd& A, Eigen::VectorXd& lb, Eigen::VectorXd& ub, bool debug = false)
       {
+                std::cout<<"over"<<std::endl;
         auto robot_model = boost::dynamic_pointer_cast<Dragon::HydrusLikeRobotModel>(planner_->getRobotModelPtr());
         const auto joint_positions = planner_->getTargetJointVector<KDL::JntArray>();
 

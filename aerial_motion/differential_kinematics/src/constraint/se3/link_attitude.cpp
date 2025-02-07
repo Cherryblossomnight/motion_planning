@@ -75,6 +75,7 @@ namespace differential_kinematics
 
       bool getConstraint(Eigen::MatrixXd& A, Eigen::VectorXd& lb, Eigen::VectorXd& ub, bool debug = false)
       {
+                std::cout<<"link"<<std::endl;
         auto robot_model = planner_->getRobotModelPtr();
         const auto joint_positions = planner_->getTargetJointVector<KDL::JntArray>();
         const auto& seg_frames = robot_model->getSegmentsTf();
