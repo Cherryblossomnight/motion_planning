@@ -66,7 +66,6 @@ namespace differential_kinematics
 
       bool getConstraint(Eigen::MatrixXd& A, Eigen::VectorXd& lb, Eigen::VectorXd& ub, bool debug = false)
       {
-                std::cout<<"jo"<<std::endl;
         auto robot_model = planner_->getRobotModelPtr();
         const auto& joint_indices = robot_model->getJointIndices();
         const auto& link_joint_indices = robot_model->getLinkJointIndices();

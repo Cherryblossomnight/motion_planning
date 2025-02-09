@@ -131,9 +131,7 @@ namespace differential_kinematics
       if(debug) std::cout << "delta cartesian: \n" << delta_cartesian.transpose() << std::endl;
 
       Eigen::MatrixXd jacobian;
-           std::cout<<"2jacobian"<<jacobian<<std::endl;
       if(!calcJointJacobian(jacobian, debug)) return false;
-      std::cout<<"3jacobian"<<jacobian.size()<<std::endl;
       H = jacobian.transpose() * W_cartesian_err_constraint_ * jacobian;
       /* CAUTION: becuase of QP-OASES, the scale "2" is included inside the function */
       g = - delta_cartesian.transpose()  * W_cartesian_err_constraint_ * jacobian;
@@ -151,21 +149,10 @@ namespace differential_kinematics
     {
       const auto robot_model = planner_->getRobotModelPtr();
       const auto joint_positions = planner_->getTargetJointVector<KDL::JntArray>();
-       std::cout<<"1jacobian"<<jacobian<<std::endl;
-    std::cout<<"--"<<std::endl;
       jacobian = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p);
-      std::cout<<"a "<<robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p)<<std::endl;
-      std::cout<<"b "<<jacobian<<std::endl;
-      std::cout<<"-------------------"<<std::endl;
+
    
    
-      // TODO change better way to construct jacobian
-      // Eigen::MatrixXd jac = Eigen::MatrixXd::Zero(6, 9);
-      // jac.block(0, 0, 6, 6) = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p).block(0, 0, 6, 6);
-      // jac.block(0, 6, 6, 1) = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p).block(0, 7, 6, 1);
-      // jac.block(0, 7, 6, 1) = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p).block(0, 9, 6, 1);
-      // jac.block(0, 8, 6, 1) = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p).block(0, 11, 6, 1);
-      // jacobian = jac;
       if(!full_body_) jacobian.leftCols(6) = Eigen::MatrixXd::Zero(jacobian.rows(), 6);
 
       /* change to reference frame */

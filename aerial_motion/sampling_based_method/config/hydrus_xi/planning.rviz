@@ -15,7 +15,7 @@ Panels:
         - /RobotState1
         - /MarkerArray2
       Splitter Ratio: 0.5
-    Tree Height: 1440
+    Tree Height: 1012
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -31,16 +31,15 @@ Panels:
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
-    Experimental: false
     Name: Time
     SyncMode: 0
     SyncSource: ""
   - Class: jsk_rviz_plugin/PublishTopic
     Name: PublishTopic
-    Topic: /hydrus/plan_start
+    Topic: /hydrus_xi/plan_start
   - Class: jsk_rviz_plugin/PublishTopic
     Name: PublishTopic
-    Topic: /hydrus/move_start
+    Topic: /hydrus_xi/move_start
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -86,42 +85,42 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        bat3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        bat4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        end_effector:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         fc:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gps:
+        gimbal_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leddarone:
+        gimbal_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leg1:
+        gimbal_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leg2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg5:
+        gimbal_link4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -146,16 +145,28 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        magnet:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         pc:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
         root:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -180,8 +191,8 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotModel
-      Robot Description: hydrus/robot_description
-      TF Prefix: hydrus
+      Robot Description: hydrus_xi/robot_description
+      TF Prefix: hydrus_xi
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -190,7 +201,7 @@ Visualization Manager:
       Move Group Namespace: ""
       Name: PlanningScene
       Planning Scene Topic: /planning_scene
-      Robot Description: hydrus/robot_description
+      Robot Description: hydrus_xi/robot_description
       Scene Geometry:
         Scene Alpha: 0.800000011920929
         Scene Color: 50; 230; 50
@@ -216,42 +227,42 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          bat3:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          bat4:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          end_effector:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           fc:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          gps:
+          gimbal_link1:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          leddarone:
+          gimbal_link2:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          leg1:
+          gimbal_link3:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          leg2:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          leg3:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          leg4:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          leg5:
+          gimbal_link4:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -276,16 +287,28 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          magnet:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
           pc:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
           root:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          rotor_parent1:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          rotor_parent2:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          rotor_parent3:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          rotor_parent4:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -313,12 +336,14 @@ Visualization Manager:
         Show Robot Collision: false
         Show Robot Visual: false
       Value: true
-    - Class: rviz/Axes
+    - Alpha: 1
+      Class: rviz/Axes
       Enabled: false
       Length: 1
       Name: Axes
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
+      Show Trail: false
       Value: false
     - Alpha: 1
       Buffer Length: 1
@@ -337,6 +362,7 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
+      Queue Size: 10
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
@@ -353,6 +379,8 @@ Visualization Manager:
       Value: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
@@ -360,21 +388,21 @@ Visualization Manager:
           Value: true
         hydrus/bat2:
           Value: true
+        hydrus/bat3:
+          Value: true
+        hydrus/bat4:
+          Value: true
+        hydrus/end_effector:
+          Value: true
         hydrus/fc:
           Value: true
-        hydrus/gps:
+        hydrus/gimbal_link1:
           Value: true
-        hydrus/leddarone:
+        hydrus/gimbal_link2:
           Value: true
-        hydrus/leg1:
+        hydrus/gimbal_link3:
           Value: true
-        hydrus/leg2:
-          Value: true
-        hydrus/leg3:
-          Value: true
-        hydrus/leg4:
-          Value: true
-        hydrus/leg5:
+        hydrus/gimbal_link4:
           Value: true
         hydrus/link1:
           Value: true
@@ -384,11 +412,17 @@ Visualization Manager:
           Value: true
         hydrus/link4:
           Value: true
-        hydrus/magnet:
-          Value: true
         hydrus/pc:
           Value: true
         hydrus/root:
+          Value: true
+        hydrus/rotor_parent1:
+          Value: true
+        hydrus/rotor_parent2:
+          Value: true
+        hydrus/rotor_parent3:
+          Value: true
+        hydrus/rotor_parent4:
           Value: true
         hydrus/thrust1:
           Value: true
@@ -398,13 +432,138 @@ Visualization Manager:
           Value: true
         hydrus/thrust4:
           Value: true
+        hydrus_xi/bat1:
+          Value: true
+        hydrus_xi/bat2:
+          Value: true
+        hydrus_xi/bat3:
+          Value: true
+        hydrus_xi/bat4:
+          Value: true
+        hydrus_xi/cog:
+          Value: true
+        hydrus_xi/end_effector:
+          Value: true
+        hydrus_xi/fc:
+          Value: true
+        hydrus_xi/gimbal_link1:
+          Value: true
+        hydrus_xi/gimbal_link2:
+          Value: true
+        hydrus_xi/gimbal_link3:
+          Value: true
+        hydrus_xi/gimbal_link4:
+          Value: true
+        hydrus_xi/link1:
+          Value: true
+        hydrus_xi/link2:
+          Value: true
+        hydrus_xi/link3:
+          Value: true
+        hydrus_xi/link4:
+          Value: true
+        hydrus_xi/pc:
+          Value: true
+        hydrus_xi/root:
+          Value: true
+        hydrus_xi/rotor_parent1:
+          Value: true
+        hydrus_xi/rotor_parent2:
+          Value: true
+        hydrus_xi/rotor_parent3:
+          Value: true
+        hydrus_xi/rotor_parent4:
+          Value: true
+        hydrus_xi/thrust1:
+          Value: true
+        hydrus_xi/thrust2:
+          Value: true
+        hydrus_xi/thrust3:
+          Value: true
+        hydrus_xi/thrust4:
+          Value: true
+        world:
+          Value: true
+      Marker Alpha: 1
       Marker Scale: 0.5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        hydrus/gimbal_link1:
+          hydrus/rotor_parent1:
+            hydrus/thrust1:
+              {}
+        hydrus/gimbal_link2:
+          hydrus/rotor_parent2:
+            hydrus/thrust2:
+              {}
+        hydrus/gimbal_link3:
+          hydrus/rotor_parent3:
+            hydrus/thrust3:
+              {}
+        hydrus/gimbal_link4:
+          hydrus/rotor_parent4:
+            hydrus/thrust4:
+              {}
+        hydrus/link2:
+          hydrus/bat2:
+            {}
+          hydrus/fc:
+            {}
+        hydrus/link3:
+          hydrus/bat3:
+            {}
+          hydrus/pc:
+            {}
+        hydrus/link4:
+          hydrus/bat4:
+            {}
+          hydrus/end_effector:
+            {}
+        hydrus/root:
+          hydrus/link1:
+            hydrus/bat1:
+              {}
+        world:
+          hydrus_xi/root:
+            hydrus_xi/cog:
+              {}
+            hydrus_xi/link1:
+              hydrus_xi/bat1:
+                {}
+              hydrus_xi/gimbal_link1:
+                hydrus_xi/rotor_parent1:
+                  hydrus_xi/thrust1:
+                    {}
+              hydrus_xi/link2:
+                hydrus_xi/bat2:
+                  {}
+                hydrus_xi/fc:
+                  {}
+                hydrus_xi/gimbal_link2:
+                  hydrus_xi/rotor_parent2:
+                    hydrus_xi/thrust2:
+                      {}
+                hydrus_xi/link3:
+                  hydrus_xi/bat3:
+                    {}
+                  hydrus_xi/gimbal_link3:
+                    hydrus_xi/rotor_parent3:
+                      hydrus_xi/thrust3:
+                        {}
+                  hydrus_xi/link4:
+                    hydrus_xi/bat4:
+                      {}
+                    hydrus_xi/end_effector:
+                      {}
+                    hydrus_xi/gimbal_link4:
+                      hydrus_xi/rotor_parent4:
+                        hydrus_xi/thrust4:
+                          {}
+                  hydrus_xi/pc:
+                    {}
       Update Interval: 0
       Value: true
     - Attached Body Color: 150; 50; 150
@@ -427,42 +586,42 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        bat3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        bat4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        end_effector:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         fc:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        gps:
+        gimbal_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leddarone:
+        gimbal_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leg1:
+        gimbal_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        leg2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        leg5:
+        gimbal_link4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -487,16 +646,28 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        magnet:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         pc:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
         root:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rotor_parent4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -522,8 +693,8 @@ Visualization Manager:
           Value: true
       Name: RobotState
       Robot Alpha: 1
-      Robot Description: hydrus/robot_description
-      Robot State Topic: /hydrus/desired_robot_state
+      Robot Description: hydrus_xi/robot_description
+      Robot State Topic: /hydrus_xi/desired_robot_state
       Show All Links: true
       Show Highlights: true
       Value: true
@@ -536,12 +707,14 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
-    - Class: rviz/Axes
+    - Alpha: 1
+      Class: rviz/Axes
       Enabled: false
       Length: 1
       Name: Axes
       Radius: 0.10000000149011612
       Reference Frame: <Fixed Frame>
+      Show Trail: false
       Value: false
   Enabled: true
   Global Options:
@@ -577,6 +750,7 @@ Visualization Manager:
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Field of View: 0.7853981852531433
       Focal Point:
         X: -0.0339285172522068
         Y: 0.17605897784233093
@@ -588,18 +762,17 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.0997967720031738
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
       Yaw: 3.5185859203338623
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 2105
+  Height: 1562
   Hide Left Dock: false
   Hide Right Dock: false
   PublishTopic:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a000007dffc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000062b000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000018005000750062006c0069007300680054006f007000690063010000066e000000d40000006000fffffffb00000018005000750062006c0069007300680054006f0070006900630100000748000000d40000006000ffffff000000010000010f000003befc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000028000003be000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006500000000000000073f000004f300fffffffb0000000800540069006d0065010000000000000450000000000000000000000d4d000007df00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a000005c0fc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000047f000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000018005000750062006c0069007300680054006f00700069006301000004c20000009b0000006000fffffffb00000018005000750062006c0069007300680054006f00700069006301000005630000009a0000006000ffffff000000010000010f000003befc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000028000003be000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006500000000000000073f0000042800fffffffb0000000800540069006d006501000000000000045000000000000000000000099b000005c000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -608,6 +781,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 3773
-  X: 67
-  Y: 27
+  Width: 2827
+  X: 1977
+  Y: 316

@@ -3,7 +3,7 @@
   <arg name="headless" default="false" />
 
   <arg name="simulation" default="false" />
-  <arg name="robot_ns" default="hydrus" />
+  <arg name="robot_ns" default="hydrus_xi" />
   <arg name="type" default="quad" />
 
   <arg name="discrete_path_search_method_name" default="differential_kinematics" />
@@ -27,7 +27,7 @@
       <arg name="headless" value="$(arg headless)" />
       <arg name="robot_model" value="$(arg robot_model)" />
       <arg name="robot_ns" value="$(arg robot_ns)" />
-      <arg name="rviz_config" value="$(find sampling_based_method)/config/hydrus/planning.rviz" />
+      <arg name="rviz_config" value="$(find sampling_based_method)/config/hydrus_xi/planning.rviz" />
       <arg name="rviz_init_pose" value="$(find hydrus_xi)/config/$(arg type)/RvizInit.yaml" />
       <arg name="need_joint_state" value="false"/>
     </include>
@@ -35,7 +35,7 @@
 
   ########## Sampling based method (Moveit) ###########
   <group ns="$(arg robot_ns)">
-    <param name="robot_description_semantic" textfile="$(find sampling_based_method)/config/hydrus/$(arg type)/moveit.srdf" />
+    <param name="robot_description_semantic" textfile="$(find sampling_based_method)/config/hydrus_xi/$(arg type)/moveit.srdf" />
     <rosparam file="$(arg robot_config_dir)/RobotModel.yaml" command="load" />
   </group>
 
@@ -53,6 +53,7 @@
     <rosparam file="$(find squeeze_navigation)/config/$(arg discrete_path_search_method_name)/2d_gap.yaml" command="load"/>
 
     <param name="discrete_path_debug_flag" value="$(arg discrete_path_debug_flag)" />
+    <param name="robot_type" type="string" value="$(arg robot_ns)" /> 
     <param name="motion_type" value="0" /> <!--SE2: 0, SE3: 1 -->
     <param name="gap_type" value="1" /> <!-- unless="$(arg horizontal_gap)" -->
     <param name="file_state_offset_x" type="double" value="0.0" />

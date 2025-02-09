@@ -227,10 +227,6 @@ namespace differential_kinematics
             Eigen::VectorXd single_g;
             /* hesian and gradient should be linear sum */
             (*itr)->getHessianGradient(single_convergence, single_H, single_g, debug);
-            std::cout<<"qp_H size: "<<qp_H.size()<<std::endl;
-            std::cout<<"single_H size: "<<single_H.size()<<std::endl;
-            std::cout<<"qp_g size: "<<qp_g.size()<<std::endl;
-            std::cout<<"single_g size: "<<single_g.size()<<std::endl;
             qp_H += single_H;
             qp_g += single_g;
             convergence &= single_convergence;
@@ -243,13 +239,12 @@ namespace differential_kinematics
             solved_ = true;
             return true;
           }
-     
+      std::cout<<"bbbb"<<std::endl;
         /* step3: update Constaint Matrix and Bounds */
         size_t offset = 0;
-          std::cout<<"aaaa"<<std::endl;
+        int i = 0;
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
-            std::cout<<"bbbb"<<std::endl;
             Eigen::MatrixXd single_A;
             Eigen::VectorXd single_lb;
             Eigen::VectorXd single_ub;
@@ -259,8 +254,6 @@ namespace differential_kinematics
                 ROS_ERROR("constraint: %s is invalid", (*itr)->getConstraintName().c_str());
                 return false;
               }
-          std::cout<<"single_lb: "<<single_lb.size()<<std::endl;
-            std::cout<<"qp_lb: "<<qp_lb.size()<<std::endl;
             /* for qpoasese */
             if((*itr)->directConstraint()) /* without constraint matrix */
               {
@@ -281,11 +274,18 @@ namespace differential_kinematics
               {
                 qp_lA.segment(offset, (*itr)->getNc()) = single_lb;
                 qp_uA.segment(offset, (*itr)->getNc()) = single_ub;
+                std::cout<<"lb"<<single_lb<<std::endl;
+                   std::cout<<"ub"<<single_ub<<std::endl;
+                     std::cout<<i<<std::endl;
+                        std::cout<<(*itr)->getNc()<<std::endl;
                 qp_A.block(offset, 0, single_A.rows(), single_A.cols()) = single_A;
                 offset += (*itr)->getNc();
-              }
+          
+            }
+             i++; 
           }
-           std::cout<<"cccc"<<std::endl;
+
+          debug=true;
         if(debug)
           {
             std::cout << "qp H \n" << qp_H << std::endl;
@@ -294,11 +294,12 @@ namespace differential_kinematics
             std::cout << "qp lA \n" << qp_lA.transpose() << std::endl;
             std::cout << "qp uA \n" << qp_uA.transpose() << std::endl;
           }
-
+       debug=false;
         /* step4: calculate the QP using qp-oases  */
         int solver_result;
         n_wsr = 100; /* this value have to be updated every time, otherwise it will decrease every loop */
         Eigen::MatrixXd qp_At = qp_A.transpose();
+         std::cout<<"ccccc"<<std::endl;
         if(qp_init_flag)
           { /* first time */
             qp_init_flag = false;
@@ -315,14 +316,14 @@ namespace differential_kinematics
                                                 qp_lb.data(), qp_ub.data(),
                                                 qp_lA.data(), qp_uA.data(), n_wsr);
           }
-
+ std::cout<<"dddd"<<std::endl;
         if(solver_result != 0)
           {
             ROS_ERROR("can not solve QP the solver_result is %d", solver_result);
             solved_ = true; //debug
             return false;
           }
- std::cout<<"dddd"<<std::endl;
+
         Eigen::VectorXd delta_state_vector = Eigen::VectorXd::Zero(qp_solver->getNV());
         qp_solver->getPrimalSolution(delta_state_vector.data());
         if(debug)

@@ -64,10 +64,14 @@ namespace differential_kinematics
 
       bool getConstraint(Eigen::MatrixXd& A, Eigen::VectorXd& lb, Eigen::VectorXd& ub, bool debug = false)
       {
-                std::cout<<"thr"<<std::endl;
+         std::cout<<"lim"<<std::endl;
+          std::cout<<f_min_thre_<<std::endl;
+              std::cout<<f_max_thre_<<std::endl;
+          
         auto robot_model = planner_->getRobotModelPtr();
 
         const Eigen::VectorXd& static_thrust = robot_model->getStaticThrust();
+               std::cout<<static_thrust<<std::endl;
         /* fill the lb/ub */
         lb = Eigen::VectorXd::Constant(nc_, -force_vel_thre_);
         ub = Eigen::VectorXd::Constant(nc_, force_vel_thre_);
