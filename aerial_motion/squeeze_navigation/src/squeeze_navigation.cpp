@@ -94,7 +94,6 @@ SqueezeNavigation::SqueezeNavigation(ros::NodeHandle nh, ros::NodeHandle nhp):
 
   /* navigation timer */
   navigate_timer_ = nh_.createTimer(ros::Duration(1.0 / controller_freq_), &SqueezeNavigation::process, this);
-
   reset();
 }
 

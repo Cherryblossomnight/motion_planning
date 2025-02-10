@@ -243,8 +243,11 @@ namespace differential_kinematics
         /* step3: update Constaint Matrix and Bounds */
         size_t offset = 0;
         int i = 0;
+  
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
+           
+           
             Eigen::MatrixXd single_A;
             Eigen::VectorXd single_lb;
             Eigen::VectorXd single_ub;
@@ -281,8 +284,11 @@ namespace differential_kinematics
                 qp_A.block(offset, 0, single_A.rows(), single_A.cols()) = single_A;
                 offset += (*itr)->getNc();
           
-            }
+             }
+            
+
              i++; 
+          
           }
 
           debug=true;
