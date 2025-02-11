@@ -41,7 +41,7 @@
 
 /* TODO: this is an workaround */
 #include <dragon/model/hydrus_like_robot_model.h> // TODO: change to full vectoring robot model
-
+#include <hydrus/hydrus_tilted_robot_model.h> 
 
 namespace differential_kinematics
 {
@@ -67,9 +67,14 @@ namespace differential_kinematics
           }
 
         /* TODO: workaround to detect whether this is a model with gimbal moduel (e.g. dragon) */
+
+         // if(joint_name.find("gimbal") == 0 &&
+        //    (joint_name.find("roll") != std::string::npos ||
+        //     joint_name.find("pitch") != std::string::npos) &&
+        //    tree_itr.second.segment.getJoint().getType() != KDL::Joint::JointType::None)
+        // Delete the roll or pitch condition, for accept hydrus_xi's gimbals
+        // TODO need to check if it would cause other problems.
         if(joint_name.find("gimbal") == 0 &&
-           (joint_name.find("roll") != std::string::npos ||
-            joint_name.find("pitch") != std::string::npos) &&
            tree_itr.second.segment.getJoint().getType() != KDL::Joint::JointType::None)
           {
             gimbal_module_flag_ = true;
@@ -158,9 +163,21 @@ namespace differential_kinematics
         /* workaround: special process for model which has gimbal module (e.g. dragon) */
         if(gimbal_module_flag_)
           {
-            auto dragon_model_ptr = boost::dynamic_pointer_cast<Dragon::HydrusLikeRobotModel>(robot_model_ptr_);
-            assert(target_joint_vector_.rows() == dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
-            target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
+            if (robot_type_ == "dragon")
+            {
+              auto dragon_model_ptr = boost::dynamic_pointer_cast<Dragon::HydrusLikeRobotModel>(robot_model_ptr_);
+              assert(target_joint_vector_.rows() == dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
+              target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
+            }
+            else if (robot_type_ == "hydrus_xi")
+            {
+              std::cout<<"gimbal"<<std::endl;
+              auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
+              assert(target_joint_vector_.rows() == hydrus_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
+              target_joint_vector_ = hydrus_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
+              for (int i = 0; i < target_joint_vector_.data.size(); i++)
+                std::cout<<target_joint_vector_(i)<<" ";
+            }
           }
 
         /* considering the non-joint modules such as gimbal are updated after forward-kinemtics */
