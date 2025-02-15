@@ -79,7 +79,6 @@ namespace differential_kinematics
 
       bool getConstraint(Eigen::MatrixXd& A, Eigen::VectorXd& lb, Eigen::VectorXd& ub, bool debug = false)
       {
-         std::cout<<"state"<<std::endl;
         int j_ndof = planner_->getRobotModelPtr()->getLinkJointIndices().size();
         A = Eigen::MatrixXd::Zero(nc_, j_ndof + 6);
         lb = Eigen::VectorXd::Constant(nc_, 1);
@@ -122,12 +121,13 @@ namespace differential_kinematics
             if(planner_->getRobotModelPtr()->getLinkJointUpperLimits().at(i) - joint_vector(index)  < joint_vel_constraint_range_)
               ub(i + 6) *= (planner_->getRobotModelPtr()->getLinkJointUpperLimits().at(i) - joint_vector(index) - joint_vel_forbidden_range_) / (joint_vel_constraint_range_ - joint_vel_forbidden_range_);
           }
-
+debug=true;
         if(debug)
           {
             std::cout << "constraint name: " << constraint_name_ << ", lb: \n" << lb.transpose() << std::endl;
             std::cout << "constraint name: " << constraint_name_ << ", ub: \n" << ub.transpose() << std::endl;
           }
+          debug=false;
         return true;
       }
 
