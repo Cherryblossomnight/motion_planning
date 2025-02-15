@@ -41,13 +41,10 @@
 
 /* TODO: this is an workaround */
 #include <dragon/model/hydrus_like_robot_model.h> // TODO: change to full vectoring robot model
-<<<<<<< HEAD
 
 #include <hydrus/hydrus_tilted_robot_model.h> 
 
-=======
-#include <hydrus/hydrus_tilted_robot_model.h> 
->>>>>>> f731985
+
 
 namespace differential_kinematics
 {
@@ -72,19 +69,11 @@ namespace differential_kinematics
               }
           }
         /* TODO: workaround to detect whether this is a model with gimbal moduel (e.g. dragon) */
-
-<<<<<<< HEAD
-        // if(joint_name.find("gimbal") == 0 &&
-        //    (joint_name.find("roll") != std::string::npos ||
-        //     joint_name.find("pitch") != std::string::npos) &&
-        //    tree_itr.second.segment.getJoint().getType() != KDL::Joint::JointType::None)
-
-=======
          // if(joint_name.find("gimbal") == 0 &&
         //    (joint_name.find("roll") != std::string::npos ||
         //     joint_name.find("pitch") != std::string::npos) &&
         //    tree_itr.second.segment.getJoint().getType() != KDL::Joint::JointType::None)
->>>>>>> f731985
+
         // Delete the roll or pitch condition, for accept hydrus_xi's gimbals
         // TODO need to check if it would cause other problems.
         if(joint_name.find("gimbal") == 0 &&
@@ -103,10 +92,7 @@ namespace differential_kinematics
     joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>(joint_state_pub_name, 1);
     nhp_.param("tf_prefix", tf_prefix_, std::string(""));
     nhp_.param("robot_type", robot_type_, std::string("hydrus"));
-<<<<<<< HEAD
-=======
 
->>>>>>> f731985
     /* motion timer */
     double rate;
     nhp_.param("motion_func_rate", rate, 10.0);
@@ -177,36 +163,11 @@ namespace differential_kinematics
             }
           }
         }
-        std::cout<<"target pose "<< aerial_robot_model::kdlToEigen(target_root_pose_.M)<<std::endl;
         robot_model_ptr_->setCogDesireOrientation(target_root_pose_.M);
         robot_model_ptr_->updateRobotModel(target_joint_vector_);
         robot_model_ptr_->updateJacobians();
 
 
-          if(gimbal_module_flag_)
-          {
-            if (robot_type_ == "dragon")
-            {
-              auto dragon_model_ptr = boost::dynamic_pointer_cast<Dragon::HydrusLikeRobotModel>(robot_model_ptr_);
-              assert(target_joint_vector_.rows() == dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
-              target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
-            }
-            else if (robot_type_ == "hydrus_xi")
-            {
-              std::cout<<"gimbal"<<std::endl;
-              auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
-              assert(target_joint_vector_.rows() == hydrus_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
-              target_joint_vector_ = hydrus_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
-              for (int i = 0; i < target_joint_vector_.data.size(); i++)
-                std::cout<<target_joint_vector_(i)<<" ";
-            }
-          }
-        robot_model_ptr_->setCogDesireOrientation(target_root_pose_.M);
-        std::cout<<"-----"<<std::endl;
-        robot_model_ptr_->updateRobotModel(target_joint_vector_);
-           std::cout<<"-----"<<std::endl;
-        robot_model_ptr_->updateJacobians();
-       std::cout<<"-----"<<std::endl;
         if(!robot_model_ptr_->stabilityCheck()) ROS_ERROR("[differential kinematics]: invalid stability");
 
         /* update each cost or constraint (e.g. changable ik), if necessary */
@@ -220,10 +181,10 @@ namespace differential_kinematics
             }
           }
 
-<<<<<<< HEAD
+
         /* workaround: special process for model which has gimbal module (e.g. dragon or hydrus_xi) */
       
-=======
+
         /* workaround: special process for model which has gimbal module (e.g. dragon) */
         if(gimbal_module_flag_)
           {
@@ -233,22 +194,6 @@ namespace differential_kinematics
               assert(target_joint_vector_.rows() == dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
               target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
             }
-            // else if (robot_type_ == "hydrus_xi")
-            // {   
-            //   auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
-            //   const auto joint_index_map = hydrus_model_ptr->getJointIndexMap();
-            //   int rotor_num = hydrus_model_ptr->getRotorNum();
->>>>>>> f731985
-
-            //   for(int i = 0; i < rotor_num; ++i)
-            //   {
-            //     std::string s = std::to_string(i + 1);
-            //     if (!gimbals_ctrl_.name.empty())
-            //     {
-            //       target_joint_vector_(joint_index_map.find(std::string("gimbal") + s)->second) = gimbals_ctrl_.position[i];
-            //     }
-            //   }
-            // }
           }         std::cout<<"ssss"<<std::endl;
        
         /* considering the non-joint modules such as gimbal are updated after forward-kinemtics */
@@ -335,9 +280,6 @@ namespace differential_kinematics
   
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
-           
-          //  if (i != 3)
-          //  {
             Eigen::MatrixXd single_A;
             Eigen::VectorXd single_lb;
             Eigen::VectorXd single_ub;
@@ -373,15 +315,7 @@ namespace differential_kinematics
                 qp_A.block(offset, 0, single_A.rows(), single_A.cols()) = single_A;
                 offset += (*itr)->getNc();
           
-             }
-<<<<<<< HEAD
-          //  }
-            
-
-=======
->>>>>>> f731985
-             i++; 
-          
+             }         
           }
 
           debug=true;
@@ -436,9 +370,6 @@ namespace differential_kinematics
         KDL::Vector delta_pos, delta_rot;
         tf::vectorEigenToKDL(delta_state_vector.head(3), delta_pos);
         tf::vectorEigenToKDL(delta_state_vector.segment(3, 3), delta_rot);
-<<<<<<< HEAD
-//  std::cout<<"eeee: " <<aerial_robot_model::kdlToEigen(delta_pos)<<std::endl; <<std::endl;<<std::endl;
-=======
         std::cout<<"xi"<< qp_A*delta_state_vector<<std::endl;
         std::cout<<"delta"<<delta_state_vector<<std::endl; 
         std::cout<<"target_pos "<<aerial_robot_model::kdlToEigen(target_root_pose_.p)<<std::endl; 
@@ -446,7 +377,6 @@ namespace differential_kinematics
         target_root_pose_.M.GetRPY(r, p, y);
         std::cout<<"target_rot "<<r<<" "<<p<<" "<<y<<" "<<std::endl; 
         std::cout<<"target_joint "<<target_joint_vector_(1)<<" "<<target_joint_vector_(3)<<" "<<target_joint_vector_(5)<<std::endl;
->>>>>>> f731985
         if(delta_rot.Norm() == 0)
           target_root_pose_ = target_root_pose_ *  KDL::Frame(KDL::Rotation::Identity(), delta_pos);
         else
