@@ -566,7 +566,7 @@ namespace squeeze_motion_planner
       double tail_z
         = (pivot_frame.inverse()
            * planner_core_ptr_->getTargetRootPose<tf::Transform>() * tail_pos_in_root_link).z();
-
+      std::cout<<"tail_z: "<<tail_z<<std::endl;
       if (tail_z < 0)
         {
           /* phase 1 */
