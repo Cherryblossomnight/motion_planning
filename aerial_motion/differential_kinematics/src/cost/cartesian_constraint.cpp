@@ -33,7 +33,6 @@ namespace differential_kinematics
 
     bool CartersianConstraint::getHessianGradient(bool& convergence, Eigen::MatrixXd& H, Eigen::VectorXd& g, bool debug)
     {
-      std::cout<<"car"<<std::endl;
       //debug = true;
       convergence = false;
       const auto robot_model = planner_->getRobotModelPtr();
