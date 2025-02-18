@@ -118,7 +118,7 @@ namespace squeeze_motion_planner
       goal_state_.setStatesFromRoot(robot_model_ptr_, pose, joint_state);
 
       /* get opening center frame from rosparam */
-      nhp_.param("openning_pos_x", pose.position.x, 0.0);
+      nhp_.param("openning_pos_x", pose.position.x, 0.3);
       nhp_.param("openning_pos_y", pose.position.y, 0.0);
       nhp_.param("openning_pos_z", pose.position.z, 0.0);
       nhp_.param("openning_roll", r, 0.0);
@@ -127,6 +127,7 @@ namespace squeeze_motion_planner
 
       tf::pointMsgToTF(pose.position, openning_center_frame_.getOrigin());
       openning_center_frame_.setRotation(tf::createQuaternionFromRPY(r, p, y));
+      squeeze_pivot_frame_ = openning_center_frame_;
 
       setCollisionEnv();
 
@@ -139,53 +140,6 @@ namespace squeeze_motion_planner
       double wall_thickness;
       nhp_.param("wall_thickness", wall_thickness, 0.05);
       if(planner_core_ptr_->getMultilinkType() == motion_type::SE2)
-        {
-          /* setup env */
-          double openning_width, env_width, env_length, openning_yaw;
-          nhp_.param("openning_width", openning_width, 0.7);
-          nhp_.param("openning_yaw", openning_yaw, 0.0);
-          nhp_.param("env_width", env_width, 4.0);
-          nhp_.param("env_length", env_length, 6.0);
-
-          /* openning side wall(s) */
-          visualization_msgs::Marker wall;
-          wall.type = visualization_msgs::Marker::CUBE;
-          wall.action = visualization_msgs::Marker::ADD;
-          wall.header.frame_id = "world";
-          wall.color.g = 1;
-          wall.color.a = 1;
-
-          wall.scale.z = 3;
-
-          wall.scale.x = env_length;
-          wall.scale.y = wall_thickness;
-
-          wall.id = 1;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, -env_width / 2, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-          wall.id = 2;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, env_width / 2, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-
-
-          wall.scale.x = wall_thickness;
-          wall.scale.y = env_width / 2 - openning_width / 2;
-          wall.id = 3;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0)),
-                           wall.pose);
-          env_collision_.markers.push_back(wall);
-
-          wall.id = 4;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-        }
         // {
         //   /* setup env */
         //   double openning_width, env_width, env_length, openning_yaw;
@@ -209,55 +163,62 @@ namespace squeeze_motion_planner
 
         //   wall.id = 1;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width / 2, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, -env_width / 2, 0)),
         //                   wall.pose);
-        //   //env_collision_.markers.push_back(wall);
+        //   env_collision_.markers.push_back(wall);
         //   wall.id = 2;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, env_width / 2, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, env_width / 2, 0)),
         //                   wall.pose);
         //   env_collision_.markers.push_back(wall);
 
 
         //   wall.scale.x = wall_thickness;
-        //   wall.scale.y = env_width / 2;
-        //   wall.scale.z = 0.5;
+        //   wall.scale.y = env_width / 2 - openning_width / 2;
         //   wall.id = 3;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0,  env_width/4, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0)),
         //                    wall.pose);
         //   env_collision_.markers.push_back(wall);
 
         //   wall.id = 4;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0)),
         //                   wall.pose);
         //   env_collision_.markers.push_back(wall);
-
-        //   wall.scale.y = env_width / 2 - openning_width / 2;
-        //   wall.scale.z = 1;
-        //   wall.id = 5;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0.75-0.4)),
-        //                    wall.pose);
-        //   env_collision_.markers.push_back(wall);
-
-        //   wall.id = 6;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0.75-0.4)),
-        //                   wall.pose);
-        //   env_collision_.markers.push_back(wall);
-          
-        //   wall.scale.x = env_length;
-        //   wall.scale.y = env_width;
-        //   wall.scale.z = wall_thickness;
-        //   wall.id = 7;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, 0, 1.5-0.4)),
-        //                   wall.pose);
-        //   env_collision_.markers.push_back(wall);
-
         // }
+        {
+          /* setup env */
+          double openning_width, env_width, env_length, openning_yaw;
+          nhp_.param("openning_width", openning_width, 0.7);
+          nhp_.param("openning_yaw", openning_yaw, 0.0);
+          nhp_.param("env_width", env_width, 1.0);
+          nhp_.param("env_length", env_length, 0.2);
+
+          /* openning side wall(s) */
+          visualization_msgs::Marker wall;
+          wall.type = visualization_msgs::Marker::CUBE;
+          wall.action = visualization_msgs::Marker::ADD;
+          wall.header.frame_id = "world";
+          wall.color.g = 1;
+          wall.color.a = 1;
+
+          wall.scale.z = 3;
+
+          wall.scale.x = env_length;
+          wall.scale.y = wall_thickness;
+
+          wall.id = 1;
+          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
+                                        openning_center_frame_ * tf::Vector3(0.3, -env_width / 2, -0.4)),
+                          wall.pose);
+          env_collision_.markers.push_back(wall);
+          wall.id = 2;
+          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
+                                        openning_center_frame_ * tf::Vector3(0.3, env_width / 2, -0.4)),
+                          wall.pose);
+          env_collision_.markers.push_back(wall);
+        }
       else if(planner_core_ptr_->getMultilinkType() == motion_type::SE3)
         {
           /* setup env */
@@ -460,11 +421,11 @@ namespace squeeze_motion_planner
 
     boost::shared_ptr<cost::CartersianConstraint> cartersian_constraint_;
     tf::Transform squeeze_pivot_frame_;
-
     visualization_msgs::MarkerArray env_collision_;
 
     bool updatePinchPoint()
     {
+      debug_ = true;
       std::string prefix = std::string("[Pinch Strategy][phase") + std::to_string(phase_) + std::string("]");
       if(debug_) ROS_INFO_STREAM(prefix << " update");
       /* phase 1: tail link approaches the openning before squeeze */
@@ -474,7 +435,21 @@ namespace squeeze_motion_planner
 
       if(phase_ == PHASE4) return true;
 
-      tf::Transform pivot_frame = openning_center_frame_;
+      KDL::Frame pre_target_frame = cartersian_constraint_->getTargetFrame();
+      // if (pre_target_frame.p.x() < 0.03 && phase_ == PHASE2)
+      // {
+      //   phase_ = PHASE1;
+      //   KDL::Frame new_target_frame = KDL::Frame(KDL::Vector(0.32, 0, 0));
+      //   KDL::Frame new_target_frame_tf = KDL::Frame(KDL::Vector(0.3, 0, 0));
+      //   tf::transformKDLToTF(new_target_frame_tf, squeeze_pivot_frame_);
+
+      //   cartersian_constraint_->setTargetFrame(new_target_frame);
+      //   std::cout<<"new round"<<std::endl;
+      //   return true;
+      // }
+  
+
+      tf::Transform pivot_frame = squeeze_pivot_frame_;
       if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
         {
           pivot_frame.setRotation(pivot_frame.getRotation()
@@ -509,7 +484,6 @@ namespace squeeze_motion_planner
       tf::Transform prev_seg_tf;
       double prev_seg_z;
       std::string prev_seg_name = squeeze_chain_.segments.front().getName();
-
       for(const auto& segment: squeeze_chain_.segments)
         {
           tf::Transform curr_seg_tf;
@@ -519,6 +493,7 @@ namespace squeeze_motion_planner
           /* check whether can shift PHASE3 */
           if(curr_seg_z > 0)
             {
+
               if(phase_ == PHASE1)
                 {
                   ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE2 << " or " << PHASE3);
@@ -528,6 +503,9 @@ namespace squeeze_motion_planner
               if (phase_ = PHASE2) reference_point_ratio_ = 1;
 
               phase_ = PHASE3;
+
+       
+         
 
               // TODO: use reference_point_ratio_,
               //       but we have to reset reference_point_ratio_ once the seg is changed

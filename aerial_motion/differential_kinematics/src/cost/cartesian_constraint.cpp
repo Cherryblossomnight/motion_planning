@@ -132,8 +132,6 @@ namespace differential_kinematics
 
       Eigen::MatrixXd jacobian;
       if(!calcJointJacobian(jacobian, debug)) return false;
-      std::cout<<std::endl<<"jacobian"<<jacobian<<std::endl;
-      std::cout<<std::endl<<"delta"<<delta_cartesian.transpose()<<std::endl;
    
       H = jacobian.transpose() * W_cartesian_err_constraint_ * jacobian;
       /* CAUTION: becuase of QP-OASES, the scale "2" is included inside the function */

@@ -48,10 +48,7 @@ void MultilinkState::convertCogPose2RootPose(boost::shared_ptr<aerial_robot_mode
   KDL::Rotation kdl_q;
   tf::quaternionTFToKDL(baselink_desired_att, kdl_q);
   robot_model_ptr->setCogDesireOrientation(kdl_q);
-         std::cout<<"-a----"<<std::endl;
   robot_model_ptr->updateRobotModel(joint_state);
-         std::cout<<"-a----"<<std::endl;
-
   /* root */
   tf::Transform cog_tf;
   tf::poseMsgToTF(cog_pose, cog_tf);
