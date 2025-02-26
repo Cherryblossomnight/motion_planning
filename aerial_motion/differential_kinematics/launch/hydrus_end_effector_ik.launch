@@ -3,7 +3,7 @@
   ###########  launch config  ###########
   <arg name="type" default="quad" />
   <arg name="headless" default="false" />
-  <arg name="onboards_model"  default = "old_model_tx2_rs_t265_201906" />
+  <arg name="onboards_model"  default = "default_mode_201907" />
   <arg name="robot_ns" value="hydrus" />
 
   ###########  Robot Model  ###########

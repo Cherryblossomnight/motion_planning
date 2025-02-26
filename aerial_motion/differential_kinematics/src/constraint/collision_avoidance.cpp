@@ -209,6 +209,7 @@ namespace differential_kinematics
 
           /* closest points in local object frame */
           double min_dist = distance_data.result.min_distance;
+          ROS_WARN("distance = %f", min_dist);
           if(debug) ROS_WARN("distance = %f", min_dist);
 
           if(min_dist <= 0)

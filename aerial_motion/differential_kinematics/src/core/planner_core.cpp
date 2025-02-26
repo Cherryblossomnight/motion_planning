@@ -148,21 +148,21 @@ namespace differential_kinematics
       {
         KDL::Rotation root_att;
 
-        if (robot_type_ == "hydrus_xi")
-        {   
-          auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
-          const auto joint_index_map = hydrus_model_ptr->getJointIndexMap();
-          int rotor_num = hydrus_model_ptr->getRotorNum();
+        // if (robot_type_ == "hydrus_xi")
+        // {   
+        //   auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
+        //   const auto joint_index_map = hydrus_model_ptr->getJointIndexMap();
+        //   int rotor_num = hydrus_model_ptr->getRotorNum();
 
-          for(int i = 0; i < rotor_num; ++i)
-          {
-            std::string s = std::to_string(i + 1);
-            if (!gimbals_ctrl_.name.empty())
-            {
-              target_joint_vector_(joint_index_map.find(std::string("gimbal") + s)->second) = gimbals_ctrl_.position[i];
-            }
-          }
-        }
+        //   for(int i = 0; i < rotor_num; ++i)
+        //   {
+        //     std::string s = std::to_string(i + 1);
+        //     if (!gimbals_ctrl_.name.empty())
+        //     {
+        //       target_joint_vector_(joint_index_map.find(std::string("gimbal") + s)->second) = gimbals_ctrl_.position[i];
+        //     }
+        //   }
+        // }
         robot_model_ptr_->setCogDesireOrientation(target_root_pose_.M);
         robot_model_ptr_->updateRobotModel(target_joint_vector_);
         robot_model_ptr_->updateJacobians();
@@ -181,7 +181,6 @@ namespace differential_kinematics
             }
           }
 
-
         /* workaround: special process for model which has gimbal module (e.g. dragon or hydrus_xi) */
       
 
@@ -195,12 +194,10 @@ namespace differential_kinematics
               target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
             }
           }        
-       
         /* considering the non-joint modules such as gimbal are updated after forward-kinemtics */
         /* the correct target_joint vector should be added here */
         target_root_pose_sequence_.push_back(target_root_pose_);
         target_joint_vector_sequence_.push_back(target_joint_vector_);
-
         return true;
       };
 
@@ -252,6 +249,7 @@ namespace differential_kinematics
         if(l == 0) modelUpdate(); // store the init state
         /* step2: check convergence & update Hessian and Gradient */
         bool convergence = true;
+        std::cout<<cost_container.size()<<std::endl;
         for(auto itr = cost_container.begin(); itr != cost_container.end(); itr++)
           {
             bool single_convergence;
@@ -263,7 +261,6 @@ namespace differential_kinematics
             qp_g += single_g;
             convergence &= single_convergence;
           }
-
         if(convergence)
           {
             ROS_INFO("convergence to target state with %d times with %f[sec]", l, ros::Time::now().toSec() - start_time);
@@ -274,7 +271,7 @@ namespace differential_kinematics
         /* step3: update Constaint Matrix and Bounds */
         size_t offset = 0;
         int i = 0;
-  
+     
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
             Eigen::MatrixXd single_A;
@@ -314,7 +311,6 @@ namespace differential_kinematics
           
              }         
           }
-
           // debug=true;
         if(debug)
           {
@@ -361,7 +357,6 @@ namespace differential_kinematics
             std::cout << "delta state vector: \n" << delta_state_vector.transpose() << std::endl;
             std::cout << "qp_A * delta state vector: \n" << (qp_A *  delta_state_vector).transpose() << std::endl;
           }
-
         /* step5: update the state (root link & joint state) */
         /* root link incremental transformation: */
         KDL::Vector delta_pos, delta_rot;
