@@ -66,10 +66,10 @@ SqueezeNavigation::SqueezeNavigation(ros::NodeHandle nh, ros::NodeHandle nhp):
   nhp_.param("motion_type", motion_type_, 0);
   nhp_.param("robot_type", robot_type_, std::string("hydrus"));
 
-  if (robot_type_ == "hydrus") 
+  if (robot_type_ == "hydrus" ) 
     robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
   else if (robot_type_ == "hydrus_xi") 
-    robot_model_ptr_ = boost::shared_ptr<HydrusTiltedRobotModel>(new HydrusTiltedRobotModel(true));
+    robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
   else if (robot_type_ == "dragon") 
     robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new Dragon::HydrusLikeRobotModel(true));
   // if (motion_type_ == motion_type::SE2) //SE2
