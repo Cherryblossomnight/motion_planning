@@ -159,7 +159,6 @@ namespace differential_kinematics
           {
             numericalUpdate(robot_model, A, lb, ub);
           }
-debug=true;
         if(debug)
           {
             std::cout << "constraint (" << constraint_name_.c_str()  << "): matrix A: \n" << A << std::endl;

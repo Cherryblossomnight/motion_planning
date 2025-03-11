@@ -127,6 +127,7 @@ namespace squeeze_motion_planner
 
       tf::pointMsgToTF(pose.position, openning_center_frame_.getOrigin());
       openning_center_frame_.setRotation(tf::createQuaternionFromRPY(r, p, y));
+      squeeze_pivot_frame_ = openning_center_frame_;
 
       setCollisionEnv();
 
@@ -139,53 +140,6 @@ namespace squeeze_motion_planner
       double wall_thickness;
       nhp_.param("wall_thickness", wall_thickness, 0.05);
       if(planner_core_ptr_->getMultilinkType() == motion_type::SE2)
-        {
-          /* setup env */
-          double openning_width, env_width, env_length, openning_yaw;
-          nhp_.param("openning_width", openning_width, 0.7);
-          nhp_.param("openning_yaw", openning_yaw, 0.0);
-          nhp_.param("env_width", env_width, 4.0);
-          nhp_.param("env_length", env_length, 6.0);
-
-          /* openning side wall(s) */
-          visualization_msgs::Marker wall;
-          wall.type = visualization_msgs::Marker::CUBE;
-          wall.action = visualization_msgs::Marker::ADD;
-          wall.header.frame_id = "world";
-          wall.color.g = 1;
-          wall.color.a = 1;
-
-          wall.scale.z = 3;
-
-          wall.scale.x = env_length;
-          wall.scale.y = wall_thickness;
-
-          wall.id = 1;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, -env_width / 2, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-          wall.id = 2;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, env_width / 2, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-
-
-          wall.scale.x = wall_thickness;
-          wall.scale.y = env_width / 2 - openning_width / 2;
-          wall.id = 3;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0)),
-                           wall.pose);
-          env_collision_.markers.push_back(wall);
-
-          wall.id = 4;
-          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-                                        openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0)),
-                          wall.pose);
-          env_collision_.markers.push_back(wall);
-        }
         // {
         //   /* setup env */
         //   double openning_width, env_width, env_length, openning_yaw;
@@ -209,55 +163,62 @@ namespace squeeze_motion_planner
 
         //   wall.id = 1;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width / 2, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, -env_width / 2, 0)),
         //                   wall.pose);
-        //   //env_collision_.markers.push_back(wall);
+        //   env_collision_.markers.push_back(wall);
         //   wall.id = 2;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, env_width / 2, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, env_width / 2, 0)),
         //                   wall.pose);
         //   env_collision_.markers.push_back(wall);
 
 
         //   wall.scale.x = wall_thickness;
-        //   wall.scale.y = env_width / 2;
-        //   wall.scale.z = 0.5;
+        //   wall.scale.y = env_width / 2 - openning_width / 2;
         //   wall.id = 3;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0,  env_width/4, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0)),
         //                    wall.pose);
         //   env_collision_.markers.push_back(wall);
 
         //   wall.id = 4;
         //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4, -0.4)),
+        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0)),
         //                   wall.pose);
         //   env_collision_.markers.push_back(wall);
-
-        //   wall.scale.y = env_width / 2 - openning_width / 2;
-        //   wall.scale.z = 1;
-        //   wall.id = 5;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, env_width/4 + openning_width/4, 0.75-0.4)),
-        //                    wall.pose);
-        //   env_collision_.markers.push_back(wall);
-
-        //   wall.id = 6;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, -env_width/4 - openning_width/4, 0.75-0.4)),
-        //                   wall.pose);
-        //   env_collision_.markers.push_back(wall);
-          
-        //   wall.scale.x = env_length;
-        //   wall.scale.y = env_width;
-        //   wall.scale.z = wall_thickness;
-        //   wall.id = 7;
-        //   tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
-        //                                 openning_center_frame_ * tf::Vector3(0, 0, 1.5-0.4)),
-        //                   wall.pose);
-        //   env_collision_.markers.push_back(wall);
-
         // }
+        {
+          /* setup env */
+          double openning_width, env_width, env_length, openning_yaw;
+          nhp_.param("openning_width", openning_width, 0.7);
+          nhp_.param("openning_yaw", openning_yaw, 0.0);
+          nhp_.param("env_width", env_width, 0.8);
+          nhp_.param("env_length", env_length, 2.0);
+
+          /* openning side wall(s) */
+          visualization_msgs::Marker wall;
+          wall.type = visualization_msgs::Marker::CUBE;
+          wall.action = visualization_msgs::Marker::ADD;
+          wall.header.frame_id = "world";
+          wall.color.g = 1;
+          wall.color.a = 1;
+
+          wall.scale.z = 3;
+
+          wall.scale.x = env_length;
+          wall.scale.y = wall_thickness;
+
+          wall.id = 1;
+          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
+                                        openning_center_frame_ * tf::Vector3(1.0, -env_width / 2, -0.4)),
+                          wall.pose);
+          env_collision_.markers.push_back(wall);
+          wall.id = 2;
+          tf::poseTFToMsg(tf::Transform(openning_center_frame_.getRotation(),
+                                        openning_center_frame_ * tf::Vector3(1.0, env_width / 2, -0.4)),
+                          wall.pose);
+          env_collision_.markers.push_back(wall);
+        }
       else if(planner_core_ptr_->getMultilinkType() == motion_type::SE3)
         {
           /* setup env */
@@ -332,29 +293,59 @@ namespace squeeze_motion_planner
           ROS_INFO_STREAM("squeezing based on differential kinematics, add cost: " << cost.first);
 
           bool orientation = true;
-          cost_container.push_back(cost_plugin_loader.createInstance("differential_kinematics_cost/" + cost.first));
+         
 
           /* sequeezing cartesian error constraint (cost) */
           if(cost.first == std::string("cartesian_constraint"))
             {
               //orientation = false;
               orientation = true;
-              cartersian_constraint_ = boost::reinterpret_pointer_cast<cost::CartersianConstraint>(cost_container.back());
+              cost_container.push_back(cost_plugin_loader.createInstance("differential_kinematics_cost/" + cost.first));
+              cartersian_constraint_end_ = boost::reinterpret_pointer_cast<cost::CartersianConstraint>(cost_container.back());
+              cost_container.back()->initialize(nh_, nhp_, planner_core_ptr_, "differential_kinematics_cost/" + cost.first, true, true /* full_body */);
+
+              cost_container.push_back(cost_plugin_loader.createInstance("differential_kinematics_cost/" + cost.first));
+              cartersian_constraint_root_ = boost::reinterpret_pointer_cast<cost::CartersianConstraint>(cost_container.back());
+              cost_container.back()->initialize(nh_, nhp_, planner_core_ptr_, "differential_kinematics_cost/" + cost.first, false, true /* full_body */);
               // NOTE: dynamic_pointer_cast include "undefined symbol" problem, so choose reinterpret_pointer_cast
             }
+            else
+            {
+              cost_container.push_back(cost_plugin_loader.createInstance("differential_kinematics_cost/" + cost.first));
 
-          cost_container.back()->initialize(nh_, nhp_, planner_core_ptr_, "differential_kinematics_cost/" + cost.first, orientation, true /* full_body */);
+              cost_container.back()->initialize(nh_, nhp_, planner_core_ptr_, "differential_kinematics_cost/" + cost.first, orientation, true /* full_body */);
+            }
+
         }
 
       /* defualt reference point is the openning center */
       tf::Transform target_frame = openning_center_frame_;
+      target_frame1_ = openning_center_frame_;
+      target_frame2_ = openning_center_frame_;
       tf::Matrix3x3 squeeze_direct = openning_center_frame_.getBasis();
       if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
         {
           squeeze_direct *= tf::Matrix3x3(tf::createQuaternionFromRPY(0, M_PI/2, 0));
         }
       target_frame.setOrigin(target_frame.getOrigin() + squeeze_direct * tf::Vector3(0, 0, delta_pinch_length_));
-      cartersian_constraint_->setTargetFrame(target_frame);
+      target_frame1_.setOrigin(target_frame1_.getOrigin() + squeeze_direct * tf::Vector3(0, 0, 0.4 + delta_pinch_length_));
+      target_frame2_.setOrigin(target_frame2_.getOrigin() + squeeze_direct * tf::Vector3(0, 0, 1.5 + delta_pinch_length_));
+
+    
+      squeeze_pivot_frame1_.setOrigin(squeeze_pivot_frame_.getOrigin() + squeeze_direct * tf::Vector3(0, 0, 0.4));
+      squeeze_pivot_frame2_.setOrigin(squeeze_pivot_frame_.getOrigin() + squeeze_direct * tf::Vector3(0, 0, 1.5));
+
+      if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
+      {
+        squeeze_pivot_frame_.setRotation(openning_center_frame_.getRotation()
+                                * tf::createQuaternionFromRPY(0, M_PI/2, 0));
+        squeeze_pivot_frame1_.setRotation(openning_center_frame_.getRotation()
+                                * tf::createQuaternionFromRPY(0, M_PI/2, 0));
+        squeeze_pivot_frame2_.setRotation(openning_center_frame_.getRotation()
+                                * tf::createQuaternionFromRPY(0, M_PI/2, 0));
+      }
+      cartersian_constraint_end_->setTargetFrame(target_frame);
+      cartersian_constraint_root_->setTargetFrame(target_frame);
       ROS_WARN("target frame:[%f, %f, %f]", target_frame.getOrigin().x(),
                target_frame.getOrigin().y(), target_frame.getOrigin().z());
 
@@ -421,12 +412,14 @@ namespace squeeze_motion_planner
             }
           ROS_WARN("total path length: %d", (int)discrete_path_.size());
 
-          cartersian_constraint_.reset(); // necessary for PluginLoader unloading
+          cartersian_constraint_end_.reset();
+          cartersian_constraint_root_.reset(); // necessary for PluginLoader unloading
           return true;
         }
 
       /* cannot solve */
-      cartersian_constraint_.reset(); // necessary for PluginLoader unloading
+      cartersian_constraint_end_.reset();
+      cartersian_constraint_root_.reset(); // necessary for PluginLoader unloading
       return false;
     }
 
@@ -458,43 +451,268 @@ namespace squeeze_motion_planner
 
     KDL::Chain squeeze_chain_;
 
-    boost::shared_ptr<cost::CartersianConstraint> cartersian_constraint_;
+    boost::shared_ptr<cost::CartersianConstraint> cartersian_constraint_end_;
+    boost::shared_ptr<cost::CartersianConstraint> cartersian_constraint_root_;
+    tf::Transform target_frame1_;
+    tf::Transform target_frame2_;
     tf::Transform squeeze_pivot_frame_;
-
+    tf::Transform squeeze_pivot_frame1_;
+    tf::Transform squeeze_pivot_frame2_;
     visualization_msgs::MarkerArray env_collision_;
+
+    // bool updatePinchPoint()
+    // {
+    //   debug_ = true;
+    //   std::string prefix = std::string("[Pinch Strategy][phase") + std::to_string(phase_) + std::string("]");
+    //   if(debug_) ROS_INFO_STREAM(prefix << " update");
+    //   /* phase 1: tail link approaches the openning before squeeze */
+    //   /* phase 2: tail link starts to squeeze openning  */
+    //   /* phase 3: intermediate link squeezes openning */
+    //   /* phase 4: root link close to openning => finish */
+
+    //   if(phase_ == PHASE4) return true;
+
+    //   KDL::Frame pre_target_frame = cartersian_constraint_->getTargetFrame();
+    //   // if (pre_target_frame.p.x() < 0.53 && phase_ == PHASE2)
+    //   // {
+    //   //   phase_ = PHASE1;
+    //   //   KDL::Frame new_target_frame = KDL::Frame(KDL::Vector(1.02, 0, 0));
+    //   //   KDL::Frame new_target_frame_tf = KDL::Frame(KDL::Vector(1.0, 0, 0));
+    //   //   tf::transformKDLToTF(new_target_frame_tf, squeeze_pivot_frame_);
+
+    //   //   cartersian_constraint_->setTargetFrame(new_target_frame);
+    //   //   std::cout<<"new round"<<std::endl;
+    //   //   return true;
+    //   // }
+  
+
+    //   tf::Transform pivot_frame = squeeze_pivot_frame_;
+    //   if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
+    //     {
+    //       pivot_frame.setRotation(pivot_frame.getRotation()
+    //                               * tf::createQuaternionFromRPY(0, M_PI/2, 0));
+    //     }
+         
+    //   /* check whether can shift PHASE4 */
+    //   if((pivot_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>()).getOrigin().z() > -0.01)
+    //     {
+    //       if(phase_ < PHASE3)
+    //         {
+    //           ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE3);
+    //           return false;
+    //         }
+
+    //       ROS_INFO_STREAM(prefix << " shift to phase 4 to finish squeezing");
+    //       cartersian_constraint_->setReferenceFrame(std::string("link1"), KDL::Frame::Identity());
+    //       phase_ = PHASE4;
+    //       return true;
+    //     }
+
+    //   /* update robot model (maybe duplicated, but necessary) */
+    //   if (planner_core_ptr_->getMultilinkType() == motion_type::SE3)
+    //     {
+    //       robot_model_ptr_->setCogDesireOrientation(planner_core_ptr_->getTargetRootPose<KDL::Frame>().M);
+    //     }
+    //   robot_model_ptr_->updateRobotModel(planner_core_ptr_->getTargetJointVector<KDL::JntArray>());
+
+    //   /* fullFK */
+    //   auto full_fk_result = planner_core_ptr_->getRobotModelPtr()->fullForwardKinematics(planner_core_ptr_->getTargetJointVector<KDL::JntArray>());
+
+    //   tf::Transform prev_seg_tf;
+    //   double prev_seg_z;
+    //   std::string prev_seg_name = squeeze_chain_.segments.front().getName();
+    //   for(const auto& segment: squeeze_chain_.segments)
+    //     {
+    //       tf::Transform curr_seg_tf;
+    //       tf::transformKDLToTF(full_fk_result.at(segment.getName()), curr_seg_tf);
+    //       double curr_seg_z = (pivot_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>() * curr_seg_tf).getOrigin().z();
+
+    //       /* check whether can shift PHASE3 */
+    //       if(curr_seg_z > 0)
+    //         {
+
+    //           if(phase_ == PHASE1)
+    //             {
+    //               ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE2 << " or " << PHASE3);
+    //               return false;
+    //             }
+
+    //           if (phase_ = PHASE2) reference_point_ratio_ = 1;
+
+    //           phase_ = PHASE3;
+
+       
+         
+
+    //           // TODO: use reference_point_ratio_,
+    //           //       but we have to reset reference_point_ratio_ once the seg is changed
+    //           double ref_point_ratio = fabs(prev_seg_z) / (fabs(prev_seg_z) + curr_seg_z);
+    //           if(ref_point_ratio < reference_point_ratio_) reference_point_ratio_ = ref_point_ratio;
+    //           double seg_length = (curr_seg_tf.getOrigin() - prev_seg_tf.getOrigin()).length();
+
+    //           KDL::Frame target_frame = KDL::Frame(KDL::Vector(seg_length * ref_point_ratio, 0, 0));
+    //           cartersian_constraint_->setReferenceFrame(prev_seg_name, target_frame);
+
+    //           if(debug_)
+    //             {
+    //               ROS_INFO_STREAM(prefix
+    //                               << " upper seg: " << segment.getName()
+    //                               << " cross seg: " << prev_seg_name
+    //                               << " upper point z: " << curr_seg_z
+    //                               << " lower point_z: " << prev_seg_z
+    //                               << " ref_point_ratio: " << ref_point_ratio
+    //                               << " seg_length: " << seg_length
+    //                               << " reference_point_ratio_: " << reference_point_ratio_);
+    //             }
+
+    //           return true;
+    //         }
+
+    //       prev_seg_tf = curr_seg_tf;
+    //       prev_seg_z = curr_seg_z;
+    //       prev_seg_name = segment.getName();
+    //     }
+
+    //   /* tail of the robot */
+    //   tf::Transform tail_seg_tf;
+    //   tf::transformKDLToTF(full_fk_result.at(squeeze_chain_.segments.back().getName()),tail_seg_tf);
+    //   tf::Vector3 tail_pos_in_root_link
+    //     = tail_seg_tf * tf::Vector3(robot_model_ptr_->getLinkLength(), 0, 0);
+    //   double tail_z
+    //     = (pivot_frame.inverse()
+    //        * planner_core_ptr_->getTargetRootPose<tf::Transform>() * tail_pos_in_root_link).z();
+    //   if (tail_z < 0)
+    //     {
+    //       /* phase 1 */
+    //       if(phase_ > PHASE1)
+    //         {
+    //           ROS_ERROR_STREAM(prefix << "correct phase should be " <<  PHASE1);
+    //           return false;
+    //         }
+
+    //       if(debug_) ROS_INFO_STREAM(prefix << " the tail link does not pass");
+    //       ROS_INFO_STREAM(prefix << " tail pos z : " << tail_z);
+
+    //       std::string target_name = squeeze_chain_.segments.back().getName();
+    //       KDL::Frame target_frame = KDL::Frame(KDL::Vector(robot_model_ptr_->getLinkLength(), 0, 0));
+    //       cartersian_constraint_->setReferenceFrame(target_name, target_frame);
+    //     }
+    //   else
+    //     {
+    //       /* phase 2 */
+    //       if(phase_ > PHASE2)
+    //         {
+    //           ROS_ERROR_STREAM(prefix << "correct phase should be " << PHASE2);
+    //           return false;
+    //         }
+
+    //       phase_ = PHASE2;
+
+    //       double ref_point_ratio = fabs(prev_seg_z) / (fabs(prev_seg_z) + tail_z);
+    //       if(ref_point_ratio < reference_point_ratio_) reference_point_ratio_ = ref_point_ratio;
+
+    //       std::string target_name = squeeze_chain_.segments.back().getName();
+    //       KDL::Frame target_frame = KDL::Frame(KDL::Vector(robot_model_ptr_->getLinkLength() * reference_point_ratio_, 0, 0));
+    //       cartersian_constraint_->setReferenceFrame(target_name, target_frame);
+    //       if(debug_) ROS_INFO_STREAM(prefix << " tail_z: " << tail_z << " previous_z:" << prev_seg_z << " new_ratio: " << ref_point_ratio << " reference_point_ratio_" << reference_point_ratio_);
+    //     }
+
+    //   return true;
+    // }
 
     bool updatePinchPoint()
     {
+      debug_ = true;
       std::string prefix = std::string("[Pinch Strategy][phase") + std::to_string(phase_) + std::string("]");
       if(debug_) ROS_INFO_STREAM(prefix << " update");
       /* phase 1: tail link approaches the openning before squeeze */
       /* phase 2: tail link starts to squeeze openning  */
       /* phase 3: intermediate link squeezes openning */
-      /* phase 4: root link close to openning => finish */
+      /* phase 4: tail link approaches the target point => finish */
+
+      switch (phase_)
+      {
+        case PHASE1:
+          if (insertThroughHole(cartersian_constraint_end_, "link4", squeeze_pivot_frame_))
+          {
+            phase_ = PHASE2;
+            reference_point_ratio_ = 1;
+          }
+          insertThroughHole(cartersian_constraint_root_, "link4", squeeze_pivot_frame_);
+  
+          break;
+        
+        case PHASE2:
+          if (insertThroughHole(cartersian_constraint_end_, "link4", squeeze_pivot_frame1_))
+          {
+            phase_ = PHASE3;
+            reference_point_ratio_ = 1;
+          }
+          cartersian_constraint_end_->setTargetFrame(target_frame1_);
+          insertThroughHole(cartersian_constraint_root_, "link2", squeeze_pivot_frame_);
+          // cartersian_constraint_root_->setTargetFrame(target_frame_);
+          reference_point_ratio_ = 1;
+          break;
+
+        case PHASE3:
+          if (insertThroughHole(cartersian_constraint_end_, "link4", squeeze_pivot_frame2_))
+          {
+            phase_ = PHASE4;
+            reference_point_ratio_ = 1;
+          }
+          cartersian_constraint_end_->setTargetFrame(target_frame2_);
+          insertThroughHole(cartersian_constraint_root_, "link2", squeeze_pivot_frame1_);
+          cartersian_constraint_root_->setTargetFrame(target_frame1_);
+          reference_point_ratio_ = 1;
+          break;
+        case PHASE4:
+          break;
+
+
+      }
 
       if(phase_ == PHASE4) return true;
 
-      tf::Transform pivot_frame = openning_center_frame_;
-      if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
-        {
-          pivot_frame.setRotation(pivot_frame.getRotation()
-                                  * tf::createQuaternionFromRPY(0, M_PI/2, 0));
-        }
+      //KDL::Frame pre_target_frame = cartersian_constraint_->getTargetFrame();
+
+
+
+
+
+      // if (pre_target_frame.p.x() < 0.53 && phase_ == PHASE2)
+      // {
+      //   phase_ = PHASE1;
+      //   KDL::Frame new_target_frame = KDL::Frame(KDL::Vector(1.02, 0, 0));
+      //   KDL::Frame new_target_frame_tf = KDL::Frame(KDL::Vector(1.0, 0, 0));
+      //   tf::transformKDLToTF(new_target_frame_tf, squeeze_pivot_frame_);
+
+      //   cartersian_constraint_->setTargetFrame(new_target_frame);
+      //   std::cout<<"new round"<<std::endl;
+      //   return true;
+      // }
+  
+
+      // tf::Transform pivot_frame = squeeze_pivot_frame_;
+      // if (planner_core_ptr_->getMultilinkType() == motion_type::SE2)
+      //   {
+      //     pivot_frame.setRotation(pivot_frame.getRotation()
+      //                             * tf::createQuaternionFromRPY(0, M_PI/2, 0));
+      //   }
          
       /* check whether can shift PHASE4 */
-      if((pivot_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>()).getOrigin().z() > -0.01)
-        {
-          if(phase_ < PHASE3)
-            {
-              ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE3);
-              return false;
-            }
+      // if((pivot_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>()).getOrigin().z() > -0.01)
+      //   {
+      //     if(phase_ < PHASE3)
+      //       {
+      //         ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE3);
+      //         return false;
+      //       }
 
-          ROS_INFO_STREAM(prefix << " shift to phase 4 to finish squeezing");
-          cartersian_constraint_->setReferenceFrame(std::string("link1"), KDL::Frame::Identity());
-          phase_ = PHASE4;
-          return true;
-        }
+      //     ROS_INFO_STREAM(prefix << " shift to phase 4 to finish squeezing");
+      //     cartersian_constraint_->setReferenceFrame(std::string("link1"), KDL::Frame::Identity());
+      //     phase_ = PHASE4;
+      //     return true;
+      //   }
 
       /* update robot model (maybe duplicated, but necessary) */
       if (planner_core_ptr_->getMultilinkType() == motion_type::SE3)
@@ -503,106 +721,65 @@ namespace squeeze_motion_planner
         }
       robot_model_ptr_->updateRobotModel(planner_core_ptr_->getTargetJointVector<KDL::JntArray>());
 
-      /* fullFK */
-      auto full_fk_result = planner_core_ptr_->getRobotModelPtr()->fullForwardKinematics(planner_core_ptr_->getTargetJointVector<KDL::JntArray>());
-
-      tf::Transform prev_seg_tf;
-      double prev_seg_z;
-      std::string prev_seg_name = squeeze_chain_.segments.front().getName();
-
-      for(const auto& segment: squeeze_chain_.segments)
-        {
-          tf::Transform curr_seg_tf;
-          tf::transformKDLToTF(full_fk_result.at(segment.getName()), curr_seg_tf);
-          double curr_seg_z = (pivot_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>() * curr_seg_tf).getOrigin().z();
-
-          /* check whether can shift PHASE3 */
-          if(curr_seg_z > 0)
-            {
-              if(phase_ == PHASE1)
-                {
-                  ROS_ERROR_STREAM(prefix << " correct phase should be " << PHASE2 << " or " << PHASE3);
-                  return false;
-                }
-
-              if (phase_ = PHASE2) reference_point_ratio_ = 1;
-
-              phase_ = PHASE3;
-
-              // TODO: use reference_point_ratio_,
-              //       but we have to reset reference_point_ratio_ once the seg is changed
-              double ref_point_ratio = fabs(prev_seg_z) / (fabs(prev_seg_z) + curr_seg_z);
-              if(ref_point_ratio < reference_point_ratio_) reference_point_ratio_ = ref_point_ratio;
-              double seg_length = (curr_seg_tf.getOrigin() - prev_seg_tf.getOrigin()).length();
-
-              KDL::Frame target_frame = KDL::Frame(KDL::Vector(seg_length * ref_point_ratio, 0, 0));
-              cartersian_constraint_->setReferenceFrame(prev_seg_name, target_frame);
-
-              if(debug_)
-                {
-                  ROS_INFO_STREAM(prefix
-                                  << " upper seg: " << segment.getName()
-                                  << " cross seg: " << prev_seg_name
-                                  << " upper point z: " << curr_seg_z
-                                  << " lower point_z: " << prev_seg_z
-                                  << " ref_point_ratio: " << ref_point_ratio
-                                  << " seg_length: " << seg_length
-                                  << " reference_point_ratio_: " << reference_point_ratio_);
-                }
-
-              return true;
-            }
-
-          prev_seg_tf = curr_seg_tf;
-          prev_seg_z = curr_seg_z;
-          prev_seg_name = segment.getName();
-        }
-
       /* tail of the robot */
-      tf::Transform tail_seg_tf;
-      tf::transformKDLToTF(full_fk_result.at(squeeze_chain_.segments.back().getName()),tail_seg_tf);
+  
+
+      return true;
+    }
+
+    bool insertThroughHole(boost::shared_ptr<cost::CartersianConstraint> cartersian_constraint_, std::string link_name, tf::Transform reference_frame)
+    {
+
+      std::string prefix = std::string("[Pinch Strategy][phase") + std::to_string(phase_) + std::string("]");
+      tf::Transform curr_seg_tf;
+      auto full_fk_result = planner_core_ptr_->getRobotModelPtr()->fullForwardKinematics(planner_core_ptr_->getTargetJointVector<KDL::JntArray>());
+      tf::transformKDLToTF(full_fk_result.at(link_name),curr_seg_tf);
       tf::Vector3 tail_pos_in_root_link
-        = tail_seg_tf * tf::Vector3(robot_model_ptr_->getLinkLength(), 0, 0);
+        = curr_seg_tf * tf::Vector3(robot_model_ptr_->getLinkLength(), 0, 0);
       double tail_z
-        = (pivot_frame.inverse()
+        = (reference_frame.inverse()
            * planner_core_ptr_->getTargetRootPose<tf::Transform>() * tail_pos_in_root_link).z();
+      double curr_seg_z = (reference_frame.inverse() * planner_core_ptr_->getTargetRootPose<tf::Transform>() * curr_seg_tf).getOrigin().z();
       if (tail_z < 0)
         {
           /* phase 1 */
-          if(phase_ > PHASE1)
-            {
-              ROS_ERROR_STREAM(prefix << "correct phase should be " <<  PHASE1);
-              return false;
-            }
+          // if(phase_ > PHASE1)
+          //   {
+          //     ROS_ERROR_STREAM(prefix << "correct phase should be " <<  PHASE1);
+          //     return false;
+          //   }
 
-          if(debug_) ROS_INFO_STREAM(prefix << " the tail link does not pass");
-          ROS_INFO_STREAM(prefix << " tail pos z : " << tail_z);
+          if(debug_) ROS_INFO_STREAM(prefix << " the "<<link_name<<" does not pass");
+          ROS_INFO_STREAM(prefix << " tail pos z : " << tail_z << " previous_z:" << curr_seg_z);
 
-          std::string target_name = squeeze_chain_.segments.back().getName();
+          std::string target_name = link_name;
           KDL::Frame target_frame = KDL::Frame(KDL::Vector(robot_model_ptr_->getLinkLength(), 0, 0));
           cartersian_constraint_->setReferenceFrame(target_name, target_frame);
         }
       else
         {
           /* phase 2 */
-          if(phase_ > PHASE2)
-            {
-              ROS_ERROR_STREAM(prefix << "correct phase should be " << PHASE2);
-              return false;
-            }
+          // if(phase_ > PHASE2)
+          //   {
+          //     ROS_ERROR_STREAM(prefix << "correct phase should be " << PHASE2);
+          //     return false;
+          //   }
 
-          phase_ = PHASE2;
-
-          double ref_point_ratio = fabs(prev_seg_z) / (fabs(prev_seg_z) + tail_z);
+          double ref_point_ratio = fabs(curr_seg_z) / (fabs(curr_seg_z) + tail_z);
           if(ref_point_ratio < reference_point_ratio_) reference_point_ratio_ = ref_point_ratio;
 
-          std::string target_name = squeeze_chain_.segments.back().getName();
+          std::string target_name = link_name;
           KDL::Frame target_frame = KDL::Frame(KDL::Vector(robot_model_ptr_->getLinkLength() * reference_point_ratio_, 0, 0));
           cartersian_constraint_->setReferenceFrame(target_name, target_frame);
-          if(debug_) ROS_INFO_STREAM(prefix << " tail_z: " << tail_z << " previous_z:" << prev_seg_z << " new_ratio: " << ref_point_ratio << " reference_point_ratio_" << reference_point_ratio_);
+          if(debug_) ROS_INFO_STREAM(prefix << " tail_z: " << tail_z << " previous_z:" << curr_seg_z << " new_ratio: " << ref_point_ratio << " reference_point_ratio_" << reference_point_ratio_);
         }
 
-      return true;
+      if (curr_seg_z > 0)
+      {
+        return true;
+      }
+      else
+        return false;
     }
 
     void setInitState(const MultilinkState& state) { start_state_ = state; }

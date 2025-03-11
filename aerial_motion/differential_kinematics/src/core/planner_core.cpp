@@ -181,7 +181,6 @@ namespace differential_kinematics
             }
           }
 
-
         /* workaround: special process for model which has gimbal module (e.g. dragon or hydrus_xi) */
       
 
@@ -194,13 +193,12 @@ namespace differential_kinematics
               assert(target_joint_vector_.rows() == dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>().rows());
               target_joint_vector_ = dragon_model_ptr->getGimbalProcessedJoint<KDL::JntArray>();
             }
-          }        
+          }         std::cout<<"ssss"<<std::endl;
        
         /* considering the non-joint modules such as gimbal are updated after forward-kinemtics */
         /* the correct target_joint vector should be added here */
         target_root_pose_sequence_.push_back(target_root_pose_);
         target_joint_vector_sequence_.push_back(target_joint_vector_);
-
         return true;
       };
 
@@ -252,6 +250,7 @@ namespace differential_kinematics
         if(l == 0) modelUpdate(); // store the init state
         /* step2: check convergence & update Hessian and Gradient */
         bool convergence = true;
+        std::cout<<cost_container.size()<<std::endl;
         for(auto itr = cost_container.begin(); itr != cost_container.end(); itr++)
           {
             bool single_convergence;
@@ -263,7 +262,6 @@ namespace differential_kinematics
             qp_g += single_g;
             convergence &= single_convergence;
           }
-
         if(convergence)
           {
             ROS_INFO("convergence to target state with %d times with %f[sec]", l, ros::Time::now().toSec() - start_time);
@@ -274,7 +272,7 @@ namespace differential_kinematics
         /* step3: update Constaint Matrix and Bounds */
         size_t offset = 0;
         int i = 0;
-  
+     
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
             Eigen::MatrixXd single_A;
@@ -315,6 +313,7 @@ namespace differential_kinematics
              }         
           }
 
+          debug=true;
         if(debug)
           {
             std::cout << "qp H \n" << qp_H << std::endl;
@@ -325,6 +324,7 @@ namespace differential_kinematics
             std::cout << "qp lb \n" << qp_lb.transpose() << std::endl;
             std::cout << "qp ub \n" << qp_ub.transpose() << std::endl;
           }
+       debug=false;
         /* step4: calculate the QP using qp-oases  */
         int solver_result;
         n_wsr = 100; /* this value have to be updated every time, otherwise it will decrease every loop */
@@ -359,15 +359,14 @@ namespace differential_kinematics
             std::cout << "delta state vector: \n" << delta_state_vector.transpose() << std::endl;
             std::cout << "qp_A * delta state vector: \n" << (qp_A *  delta_state_vector).transpose() << std::endl;
           }
-
         /* step5: update the state (root link & joint state) */
         /* root link incremental transformation: */
         KDL::Vector delta_pos, delta_rot;
         tf::vectorEigenToKDL(delta_state_vector.head(3), delta_pos);
         tf::vectorEigenToKDL(delta_state_vector.segment(3, 3), delta_rot);
-        // std::cout<<"xi"<< qp_A*delta_state_vector<<std::endl;
-        // std::cout<<"delta"<<delta_state_vector<<std::endl; 
-        // std::cout<<"target_pos "<<aerial_robot_model::kdlToEigen(target_root_pose_.p)<<std::endl; 
+        std::cout<<"xi"<< qp_A*delta_state_vector<<std::endl;
+        std::cout<<"delta"<<delta_state_vector<<std::endl; 
+        std::cout<<"target_pos "<<aerial_robot_model::kdlToEigen(target_root_pose_.p)<<std::endl; 
         double r, p, y;
         target_root_pose_.M.GetRPY(r, p, y);
         // std::cout<<"target_rot "<<r<<" "<<p<<" "<<y<<" "<<std::endl; 

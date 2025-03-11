@@ -106,6 +106,11 @@ namespace differential_kinematics
         setTargetFrame(target_frame_kdl);
       }
 
+      KDL::Frame getTargetFrame()
+      {
+        return target_frame_;
+      }
+
       void setFreeAxis(const std::vector<int>& free_axis_list)
       {
         resetAxisMask();

@@ -38,9 +38,7 @@ namespace differential_kinematics
       const auto robot_model = planner_->getRobotModelPtr();
       const auto& seg_frames = robot_model->getSegmentsTf();
       const KDL::Frame root_pose = planner_->getTargetRootPose<KDL::Frame>();
-
       KDL::Frame end_frame = seg_frames.at(parent_link_) * reference_frame_;
-
       /* full axis */
       /* process free axis */
       KDL::Frame pose_err =  target_frame_.Inverse() * root_pose * end_frame; //default
@@ -49,7 +47,7 @@ namespace differential_kinematics
       pose_err.p.y(pose_err.p.y() * free_axis_mask_(MaskAxis::TRAN_Y));
       pose_err.p.z(pose_err.p.z() * free_axis_mask_(MaskAxis::TRAN_Z));
       double pos_err = pose_err.p.Norm();
-
+      std::cout<<"err "<<pose_err.p.x()<<" "<<pose_err.p.y()<<" "<<pose_err.p.z()<<std::endl;
 
       /* -- rotation -- */
       tf::Quaternion rot_err;
@@ -71,7 +69,6 @@ namespace differential_kinematics
           tf::Vector3 coincide_axis = tf::Matrix3x3(rot_err).getColumn(2);
           angle_err = atan2(sqrt(std::pow(coincide_axis.x(), 2) + std::pow(coincide_axis.y(), 2)), coincide_axis.z() );
         }
-
       if(debug)
         ROS_INFO("pos err, angle err: %f[m], %f[rad], pos vec err w.r.t ref frame : [%f, %f, %f]", pos_err, angle_err, pose_err.p.x(), pose_err.p.y(), pose_err.p.z());
 
@@ -86,7 +83,6 @@ namespace differential_kinematics
       /* transform the cartesian err to the root link frame */
       if(pos_err > pos_err_max_) pos_err = pos_err_max_;
       if(angle_err > angle_err_max_) angle_err = angle_err_max_;
-
       /* set err in ref frame */
       KDL::Vector rot_axis;
       tf::vectorTFToKDL(rot_err.getAxis(), rot_axis);
@@ -112,7 +108,6 @@ namespace differential_kinematics
           if(err_vector.Norm() < 1e-6) target_rot_err = KDL::Vector::Zero();
           else target_rot_err = err_vector / err_vector.Norm() * angle_err;
         }
-
       Eigen::VectorXd delta_cartesian = Eigen::VectorXd::Zero(6);
       pose_err.p.Normalize();
       delta_cartesian.head(3) = aerial_robot_model::kdlToEigen(-pose_err.p * pos_err);
@@ -129,11 +124,8 @@ namespace differential_kinematics
         }
 
       if(debug) std::cout << "delta cartesian: \n" << delta_cartesian.transpose() << std::endl;
-
       Eigen::MatrixXd jacobian;
       if(!calcJointJacobian(jacobian, debug)) return false;
-      std::cout<<std::endl<<"jacobian"<<jacobian<<std::endl;
-      std::cout<<std::endl<<"delta"<<delta_cartesian.transpose()<<std::endl;
    
       H = jacobian.transpose() * W_cartesian_err_constraint_ * jacobian;
       /* CAUTION: becuase of QP-OASES, the scale "2" is included inside the function */
