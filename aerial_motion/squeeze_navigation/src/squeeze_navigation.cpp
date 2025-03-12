@@ -641,7 +641,7 @@ void SqueezeNavigation::joyStickControl(const sensor_msgs::JoyConstPtr & joy_msg
     }
   else if(joy_msg->axes.size() == BaseNavigator::PS4_AXES && joy_msg->buttons.size() == BaseNavigator::PS4_BUTTONS)
     {
-      joy_cmd = BaseNavigator::ps4joyToPs3joyConvert(*joy_msg);
+      // joy_cmd = BaseNavigator::ps4joyToPs3joyConvert(*joy_msg);
     }
   else
     {
