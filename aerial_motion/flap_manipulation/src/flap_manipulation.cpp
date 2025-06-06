@@ -374,7 +374,6 @@ void FlapManipulation::process(const ros::TimerEvent& event)
             /* TODO1: change the joint. Right now, only move position of CoG */
             /* TODO2: diff_vec should be same with contact_offset */
             tf::Vector3 diff_vec = (init_contact_point_ - ee_pos).dot(init_contact_normal_) * init_contact_normal_;
-
             aerial_robot_msgs::FlightNav nav_msg;
             nav_msg.header.frame_id = std::string("/world");
             nav_msg.header.stamp = ros::Time::now();
