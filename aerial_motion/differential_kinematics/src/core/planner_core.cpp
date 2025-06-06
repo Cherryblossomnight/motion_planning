@@ -147,22 +147,6 @@ namespace differential_kinematics
     auto modelUpdate = [this]()
       {
         KDL::Rotation root_att;
-
-        // if (robot_type_ == "hydrus_xi")
-        // {   
-        //   auto hydrus_model_ptr = boost::dynamic_pointer_cast<HydrusTiltedRobotModel>(robot_model_ptr_);
-        //   const auto joint_index_map = hydrus_model_ptr->getJointIndexMap();
-        //   int rotor_num = hydrus_model_ptr->getRotorNum();
-
-        //   for(int i = 0; i < rotor_num; ++i)
-        //   {
-        //     std::string s = std::to_string(i + 1);
-        //     if (!gimbals_ctrl_.name.empty())
-        //     {
-        //       target_joint_vector_(joint_index_map.find(std::string("gimbal") + s)->second) = gimbals_ctrl_.position[i];
-        //     }
-        //   }
-        // }
         robot_model_ptr_->setCogDesireOrientation(target_root_pose_.M);
         robot_model_ptr_->updateRobotModel(target_joint_vector_);
         robot_model_ptr_->updateJacobians();
@@ -247,8 +231,6 @@ namespace differential_kinematics
         Eigen::VectorXd qp_lA = Eigen::VectorXd::Constant(qp_solver->getNC(), -INFTY);
         Eigen::VectorXd qp_uA = Eigen::VectorXd::Constant(qp_solver->getNC(), INFTY);
 
-        // if(debug) std::cout << "the init qp lb is: \n" << qp_lb << std::endl;
-        // if(debug) std::cout << "the init qp ub is: \n" << qp_ub << std::endl;
         if(l == 0) modelUpdate(); // store the init state
         /* step2: check convergence & update Hessian and Gradient */
         bool convergence = true;
@@ -298,11 +280,7 @@ namespace differential_kinematics
                   {
            
                     if(single_lb(i) > qp_lb(i)) qp_lb(i) = single_lb(i);
-                    if(single_ub(i) < qp_ub(i)) qp_ub(i) = single_ub(i); 
-                    // std::cout << "qp lb \n" << qp_lb.transpose() << std::endl;
-                    // std::cout << "qp ub \n" << qp_ub.transpose() << std::endl;  
-                    // std::cout << "single_lb \n" << single_lb.transpose() << std::endl;
-                    // std::cout << "single_ub \n" << single_ub.transpose() << std::endl;                     
+                    if(single_ub(i) < qp_ub(i)) qp_ub(i) = single_ub(i);                    
                   }
               }
             else /* with constraint matrix */
@@ -365,22 +343,15 @@ namespace differential_kinematics
         KDL::Vector delta_pos, delta_rot;
         tf::vectorEigenToKDL(delta_state_vector.head(3), delta_pos);
         tf::vectorEigenToKDL(delta_state_vector.segment(3, 3), delta_rot);
-        // std::cout<<"xi"<< qp_A*delta_state_vector<<std::endl;
-        // std::cout<<"delta"<<delta_state_vector<<std::endl; 
-        // std::cout<<"target_pos "<<aerial_robot_model::kdlToEigen(target_root_pose_.p)<<std::endl; 
         double r, p, y;
         target_root_pose_.M.GetRPY(r, p, y);
-        // std::cout<<"target_rot "<<r<<" "<<p<<" "<<y<<" "<<std::endl; 
-        // std::cout<<"target_joint "<<target_joint_vector_(1)<<" "<<target_joint_vector_(3)<<" "<<target_joint_vector_(5)<<std::endl;
         if(delta_rot.Norm() == 0)
           target_root_pose_ = target_root_pose_ *  KDL::Frame(KDL::Rotation::Identity(), delta_pos);
         else
           target_root_pose_ = target_root_pose_ *  KDL::Frame(KDL::Rotation::Rot(delta_rot, delta_rot.Norm()), delta_pos);
         /* udpate the joint angles */
-        //  std::cout<<"target_joint ";
         for(size_t i = 0; i < robot_model_ptr_->getLinkJointIndices().size(); i++) 
         {target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i)) += delta_state_vector(i + 6);
-          std::cout<<target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i))<<" ";
         }
         /* step6: update the kinematics by forward kinemtiacs, along with the modelling with current kinematics  */
         modelUpdate();
