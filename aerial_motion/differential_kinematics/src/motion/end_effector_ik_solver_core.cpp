@@ -240,7 +240,7 @@ bool EndEffectorIKSolverCore::inverseKinematics(const tf::Transform& target_ee_p
 
 void EndEffectorIKSolverCore::calcContinuousPath(double duration)
 {
-  //TODO: consier the refine of discrete path
+  //TODO: consider the refine of discrete path
 
   if(discrete_path_.size() == 0)
     {

@@ -40,7 +40,7 @@
   </group>
 
   ###########  Path Planning and Navigation  ###########
-  <node pkg="squeeze_navigation" type="squeeze_navigation_node" name="squeeze_navigation_node" output="screen" ns="$(arg robot_ns)">
+  <node pkg="squeeze_navigation" type="squeeze_navigation_node" name="squeeze_navigation_node" output="screen" ns="$(arg robot_ns)" launch-prefix="gdb -ex run --args">
     <param name="debug_verbose" value="false" />
     <param name="headless" value="$(arg headless)" />
 

@@ -3,7 +3,7 @@
     xmlns:xacro="http://www.ros.org/wiki/xacro" name="opening" >
 
   <xacro:arg name="opening_height" default="1.0" /> <!-- m -->
-  <xacro:arg name="opening_width" default="0.7" /> <!-- m -->
+  <xacro:arg name="opening_width" default="0.0" /> <!-- m -->
   <xacro:arg name="env_width" default="4.0" /> <!-- m -->
   <xacro:arg name="env_length" default="6.0" /> <!-- m -->
   <xacro:property name="frame_mass" value="10" />
