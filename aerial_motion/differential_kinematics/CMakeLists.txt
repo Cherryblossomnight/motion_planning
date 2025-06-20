@@ -131,3 +131,10 @@ target_link_libraries (se2_end_effector_ik_node ${catkin_LIBRARIES} end_effector
 
 add_executable (se3_end_effector_ik_node src/motion/sample/se3_end_effector_ik_node.cpp)
 target_link_libraries (se3_end_effector_ik_node ${catkin_LIBRARIES} end_effector_ik_solver_core)
+
+add_library(end_effector_ik_solver src/motion/end_effector_ik_solver.cpp)
+target_link_libraries(end_effector_ik_solver ${catkin_LIBRARIES} end_effector_ik_solver_core)
+add_dependencies(end_effector_ik_solver ${catkin_EXPORTED_TARGETS})
+
+add_executable (end_effector_ik_solver_node src/motion/end_effector_ik_solver_node.cpp)
+target_link_libraries(end_effector_ik_solver_node ${catkin_LIBRARIES} end_effector_ik_solver)

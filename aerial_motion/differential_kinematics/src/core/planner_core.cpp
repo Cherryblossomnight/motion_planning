@@ -395,6 +395,7 @@ namespace differential_kinematics
         tf::Transform root_pose;
         tf::transformKDLToTF(target_root_pose_sequence_.at(sequence_), root_pose);
         br_.sendTransform(tf::StampedTransform(root_pose, now_time, "world", tf::resolve(tf_prefix_, "root")));
+        std::cout<<"solved"<<std::endl;
         joint_state_pub_.publish(joint_msg);
         sequence_++;
         if(sequence_ == target_joint_vector_sequence_.size()) sequence_ = 0;

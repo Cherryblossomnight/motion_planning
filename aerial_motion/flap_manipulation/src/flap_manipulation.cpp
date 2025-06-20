@@ -64,7 +64,7 @@ FlapManipulation::FlapManipulation(ros::NodeHandle nh, ros::NodeHandle nhp):
   target_end_ee_pose_.setIdentity();
   target_reset_ee_pose_.setIdentity();
   target_ee_pose_.setIdentity();
-  flap_pose_.setOrigin(tf::Vector3(0, 0, -100)); // invliad height for target flap
+  flap_pose_.setOrigin(tf::Vector3(0, 0, -100)); // invalid height for target flap
 
   prev_joy_cmd_.axes.resize(aerial_robot_navigation::BaseNavigator::PS4_AXES, 0);
   prev_joy_cmd_.buttons.resize(aerial_robot_navigation::BaseNavigator::PS4_BUTTONS, 0);

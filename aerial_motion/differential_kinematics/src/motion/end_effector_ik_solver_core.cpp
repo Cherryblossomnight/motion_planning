@@ -57,7 +57,7 @@ EndEffectorIKSolverCore::EndEffectorIKSolverCore(ros::NodeHandle nh, ros::NodeHa
     /* simulation: check the validation of end-effector ik sovler without dynamics */
     if(simulation)
       {
-        planner_core_ptr_->registerMotionFunc(std::bind(&EndEffectorIKSolverCore::motionFunc, this));
+        // planner_core_ptr_->registerMotionFunc(std::bind(&EndEffectorIKSolverCore::motionFunc, this));
 
         XmlRpc::XmlRpcValue init_joint_angle_params;
         nhp_.getParam("zeros", init_joint_angle_params);
@@ -255,7 +255,7 @@ void EndEffectorIKSolverCore::motionFunc()
 {
   ros::Time now_time = ros::Time::now();
   br_.sendTransform(tf::StampedTransform(target_ee_pose_, now_time, "world", tf::resolve(tf_prefix_, "target_ee")));
-
+  //joints_ctrl_pub_.publish(joints_msg);
   tf::Transform end_link_ee_tf;
   end_link_ee_tf.setIdentity();
   end_link_ee_tf.setOrigin(tf::Vector3(planner_core_ptr_->getRobotModelPtr()->getLinkLength(), 0, 0));
@@ -263,3 +263,4 @@ void EndEffectorIKSolverCore::motionFunc()
   int rotor_num = planner_core_ptr_->getRobotModelPtr()->getRotorNum();
   br_.sendTransform(tf::StampedTransform(end_link_ee_tf, now_time, tf::resolve(tf_prefix_, std::string("link") + std::to_string(rotor_num)), tf::resolve(tf_prefix_, "ee")));
 }
+
