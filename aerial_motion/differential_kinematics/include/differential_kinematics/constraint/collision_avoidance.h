@@ -79,7 +79,7 @@ namespace differential_kinematics
       {
         if (env_collision.markers.size() == 0)
           {
-            ROS_ERROR("no valid envrioment is provided, env object is zero");
+            ROS_ERROR("no valid environment is provided, env object is zero");
           }
 
         for(auto obj : env_collision.markers)

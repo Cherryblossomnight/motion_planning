@@ -99,6 +99,7 @@ namespace differential_kinematics
         lb.head(3) = - ub.head(3);
         /* L momentum: approximate to a rigid body has a inertial same with the robot model */
         ub.tail(3) = inertia * Eigen::Map<Eigen::Vector3d>(angular_limit_.data(), 3);
+        ub = ub.cwiseAbs();
         lb.tail(3) = - ub.tail(3);
         A = Eigen::MatrixXd::Zero(nc_, robot_model->getLinkJointIndices().size() + 6);
         A.topRows(3) = robot_model->getCOGJacobian();

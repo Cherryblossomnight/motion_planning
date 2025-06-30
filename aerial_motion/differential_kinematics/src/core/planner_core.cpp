@@ -259,6 +259,7 @@ namespace differential_kinematics
   
         for(auto itr = constraint_container.begin(); itr != constraint_container.end(); itr++)
           {
+            //std::cout<<(*itr)->getConstraintName().c_str()<<std::endl;
             Eigen::MatrixXd single_A;
             Eigen::VectorXd single_lb;
             Eigen::VectorXd single_ub;
@@ -292,7 +293,7 @@ namespace differential_kinematics
           
              }         
           }
-
+          // debug= true; //debug
         if(debug)
           {
             std::cout << "qp H \n" << qp_H << std::endl;
@@ -302,9 +303,8 @@ namespace differential_kinematics
             std::cout << "qp uA \n" << qp_uA.transpose() << std::endl;
             std::cout << "qp lb \n" << qp_lb.transpose() << std::endl;
             std::cout << "qp ub \n" << qp_ub.transpose() << std::endl;
-            std::cout << "qp lb \n" << qp_lb.transpose() << std::endl;
-            std::cout << "qp ub \n" << qp_ub.transpose() << std::endl;
           }
+            // debug= false; //debug
         /* step4: calculate the QP using qp-oases  */
         int solver_result;
         n_wsr = 100; /* this value have to be updated every time, otherwise it will decrease every loop */
@@ -353,7 +353,9 @@ namespace differential_kinematics
           target_root_pose_ = target_root_pose_ *  KDL::Frame(KDL::Rotation::Rot(delta_rot, delta_rot.Norm()), delta_pos);
         /* udpate the joint angles */
         for(size_t i = 0; i < robot_model_ptr_->getLinkJointIndices().size(); i++) 
-        {target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i)) += delta_state_vector(i + 6);
+        {
+          target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i)) += delta_state_vector(i + 6);
+         std::cout<<"joint"<<i+1<<target_joint_vector_(robot_model_ptr_->getLinkJointIndices().at(i))<<std::endl;
         }
         /* step6: update the kinematics by forward kinemtiacs, along with the modelling with current kinematics  */
         modelUpdate();
@@ -394,9 +396,8 @@ namespace differential_kinematics
 
         tf::Transform root_pose;
         tf::transformKDLToTF(target_root_pose_sequence_.at(sequence_), root_pose);
-        br_.sendTransform(tf::StampedTransform(root_pose, now_time, "world", tf::resolve(tf_prefix_, "root")));
-        std::cout<<"solved"<<std::endl;
-        joint_state_pub_.publish(joint_msg);
+        //br_.sendTransform(tf::StampedTransform(root_pose, now_time, "world", tf::resolve(tf_prefix_, "root")));
+        //joint_state_pub_.publish(joint_msg);
         sequence_++;
         if(sequence_ == target_joint_vector_sequence_.size()) sequence_ = 0;
 

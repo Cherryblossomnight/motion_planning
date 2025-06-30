@@ -8,8 +8,8 @@ differential_kinematics_cost:
         state_vel:
                 verbose: true
                 w_joint_vel: 0.001
-                w_root_translational_vel: 0 #0.001
-                w_root_rotational_vel: 0 #0.001
+                w_root_translational_vel: 10000 #0.001
+                w_root_rotational_vel: 10000 #0.001
 
 # constraint
 differential_kinematics_constraint:
@@ -20,15 +20,14 @@ differential_kinematics_constraint:
                 root_rotational_vel_thre: 100000 #0.17
                 joint_vel_constraint_range: 0.11
                 joint_vel_forbidden_range: 0.02
-                vebose: true
         static_thrust:
                 verbose: true
-        stability:
-                verbose: true
-                fc_t_min_thre: 0.42 # heuristic
-                fc_rp_min_thre: 3.0
-                fc_rp_dist_decrease_vel_thre: -0.05
-                rp_position_margin_thre: 0.35
+        # stability:
+        #         verbose: true
+        #         fc_t_min_thre: 0.42 # heuristic
+        #         fc_rp_min_thre: 3.0
+        #         fc_rp_dist_decrease_vel_thre: -0.05
+        #         rp_position_margin_thre: 0.35
         collision_avoidance:
                 verbose: true
                 collision_distance_constraint_range: 0.08 #0.05
@@ -36,6 +35,6 @@ differential_kinematics_constraint:
         cog_motion:
                 verbose: true
                 cog_omega_limit_flag: false
-                cog_velocity_limit: [0.01, 0.01, 0.01] # [x,y,z] (m) in world frame
-                cog_angular_limit: [0.02, 0.02, 0.02] # [x,y,z] (rad) in world frame
+                cog_velocity_limit: [0.1, 0.1, 0.1] # [x,y,z] (m) in world frame
+                cog_angular_limit: [0.1, 0.1, 0.1] # [x,y,z] (rad) in world frame
 

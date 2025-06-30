@@ -81,6 +81,7 @@ protected:
   ros::Subscriber robot_baselink_odom_sub_;
   ros::Subscriber robot_joint_states_sub_;
   ros::Subscriber control_terms_sub_;
+  ros::Subscriber ee_pos_sub_;
 
   ros::Publisher joints_ctrl_pub_;
   ros::Publisher flight_nav_pub_;
@@ -144,7 +145,7 @@ protected:
   void robotOdomCallback(const nav_msgs::OdometryConstPtr& msg);
   void robotJointStatesCallback(const sensor_msgs::JointStateConstPtr& joint_msg);
   void controlTermsCallback(const aerial_robot_msgs::PoseControlPidConstPtr& control_msg);
-
+  void endEffectorPoseCallback(const geometry_msgs::PoseConstPtr& msg);
 
   virtual void reset();
   void startNavigate();

@@ -38,11 +38,14 @@ namespace differential_kinematics
       const auto robot_model = planner_->getRobotModelPtr();
       const auto& seg_frames = robot_model->getSegmentsTf();
       const KDL::Frame root_pose = planner_->getTargetRootPose<KDL::Frame>();
-
+     
       KDL::Frame end_frame = seg_frames.at(parent_link_) * reference_frame_;
 
-      /* full axis */
-      /* process free axis */
+    //   /* full axis */std::cout<< "end_frame: \n" << aerial_robot_model::kdlToEigen(end_frame.M) << std::endl;
+       std::cout<< "target: \n" << aerial_robot_model::kdlToEigen(target_frame_.p) << std::endl;
+
+        std::cout<< "end: \n" << aerial_robot_model::kdlToEigen((root_pose * end_frame).p) << std::endl;
+       /* process free axis */
       KDL::Frame pose_err =  target_frame_.Inverse() * root_pose * end_frame; //default
       /* -- translation -- */
       pose_err.p.x(pose_err.p.x() * free_axis_mask_(MaskAxis::TRAN_X));
@@ -151,7 +154,6 @@ namespace differential_kinematics
       const auto joint_positions = planner_->getTargetJointVector<KDL::JntArray>();
       jacobian = robot_model->getJacobian(joint_positions, parent_link_, reference_frame_.p);
       if(!full_body_) jacobian.leftCols(6) = Eigen::MatrixXd::Zero(jacobian.rows(), 6);
-
       /* change to reference frame */
       Eigen::Matrix3d inv_rot = aerial_robot_model::kdlToEigen(target_frame_.M.Inverse());
       jacobian.topRows(3) =  inv_rot * jacobian.topRows(3);

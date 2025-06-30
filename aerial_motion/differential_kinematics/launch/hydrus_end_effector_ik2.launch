@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+  ###########  launch config  ###########
+  <arg name="type" default="quad" />
+  <arg name="headless" default="false" />
+  <arg name="onboards_model"  default="default_mode_201907" />
+  <arg name="robot_ns" value="hydrus_xi" />
+  <arg name="model_options" default=""/>
+  <arg name="robot_model" value="$(find hydrus)/robots/$(arg type)/$(arg onboards_model)/robot.urdf.xacro" />
+  <arg name="rviz_config" value="$(find differential_kinematics)/config/hydrus/$(arg type)/rviz_config" />
+  <arg name="rviz_init_pose" value="$(find hydrus)/config/$(arg type)/RvizInit.yaml" />
+  <arg name="need_joint_state" value="false"/>
+  ###########  Robot Model  ###########
+  <!-- <param name="robot_description" command="$(find xacro)/xacro '$(arg robot_model)' robot_name:=$(arg robot_ns)  $(arg model_options)" />
+   <node name="$(anon joint_state_publisher_gui)" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui">
+      <param name="robot_description" command="$(find xacro)/xacro '$(arg robot_model)' $(arg model_options)" />
+    </node > -->
+
+  
+  <!-- <include file="$(find aerial_robot_model)/launch/aerial_robot_model.launch" >
+    <arg name="headless" value="$(arg headless)" />
+    <arg name="robot_model" value="$(find hydrus)/robots/$(arg type)/$(arg onboards_model)/robot.urdf.xacro" />
+    <arg name="robot_ns" value="$(arg robot_ns)" />
+    <arg name="rviz_config" value="$(find differential_kinematics)/config/hydrus/$(arg type)/rviz_config" />
+    <arg name="rviz_init_pose" value="$(find hydrus)/config/$(arg type)/RvizInit.yaml" />
+    <arg name="need_joint_state" value="false"/>
+  </include> -->
+
+   <group ns="hydrus_xi">
+    <param name="robot_description" command="$(find xacro)/xacro '$(arg robot_model)' robot_name:=$(arg robot_ns)  $(arg model_options)" />
+    <!-- <rosparam file ="$(arg rviz_init_pose)" command="load"/> -->
+    <!-- <node name="$(anon joint_state_publisher_gui)" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg need_joint_state)">
+      <param name="robot_description" command="$(find xacro)/xacro '$(arg robot_model)' $(arg model_options)" />
+    </node >
+    <node name="$(anon robot_state_publisher)" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="tf_prefix" value="$(arg robot_ns)" />
+    </node>
+    <node name="$(anon rotor_tf_publisher)" pkg="aerial_robot_model" type="rotor_tf_publisher" unless="$(arg need_joint_state)">
+      <param name="tf_prefix" value="$(arg robot_ns)" />
+    </node> -->
+    <!-- <node name="$(anon rviz)" pkg="rviz" type="rviz" args="-d $(arg rviz_config)" respawn="true" unless="$(arg headless)"/> -->
+  </group>
+
+  ###########  Differential Motion Planner  ###########
+  <node pkg="differential_kinematics" type="end_effector_ik_solver_node" name="end_effector_ik_solver_node"  output="screen" ns="$(arg robot_ns)" >
+    <param name = "tf_prefix" value = "hydrus" />
+    <rosparam file="$(find hydrus)/config/$(arg type)/RvizInit.yaml" command="load" />
+    <rosparam file="$(find differential_kinematics)/config/hydrus/$(arg type)/EndEffectorIK.yaml" command="load" />
+  </node>
+
+</launch>

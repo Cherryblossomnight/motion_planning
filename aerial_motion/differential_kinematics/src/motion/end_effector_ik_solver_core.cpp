@@ -57,7 +57,7 @@ EndEffectorIKSolverCore::EndEffectorIKSolverCore(ros::NodeHandle nh, ros::NodeHa
     /* simulation: check the validation of end-effector ik sovler without dynamics */
     if(simulation)
       {
-        // planner_core_ptr_->registerMotionFunc(std::bind(&EndEffectorIKSolverCore::motionFunc, this));
+        planner_core_ptr_->registerMotionFunc(std::bind(&EndEffectorIKSolverCore::motionFunc, this));
 
         XmlRpc::XmlRpcValue init_joint_angle_params;
         nhp_.getParam("zeros", init_joint_angle_params);
@@ -80,11 +80,13 @@ EndEffectorIKSolverCore::EndEffectorIKSolverCore(ros::NodeHandle nh, ros::NodeHa
 
     /* continous path generator */
     continuous_path_generator_ = boost::make_shared<ContinuousPathGenerator>(nh_, nhp_, robot_model_ptr_);
+    srv_time_ = ros::Time::now();
   }
 
 bool EndEffectorIKSolverCore::endEffectorIkCallback(differential_kinematics::TargetPose::Request  &req,
                                                     differential_kinematics::TargetPose::Response &res)
 {
+  srv_time_ = ros::Time::now();
   collision_avoidance_ = req.collision_avoidance;
   /* start IK */
   tf::Quaternion q; q.setRPY(req.target_rot.x, req.target_rot.y, req.target_rot.z);
@@ -92,7 +94,7 @@ bool EndEffectorIKSolverCore::endEffectorIkCallback(differential_kinematics::Tar
 
   tf::Transform init_root_pose;
   init_root_pose.setIdentity();
-
+  // std::cout<<"aad"<<std::endl;
   /* exmaple of the end effector: a point from the last link origin with distance of getLinkLength() */
   setEndEffectorPose(std::string("link") + std::to_string(planner_core_ptr_->getRobotModelPtr()->getRotorNum()),
                      tf::Transform(tf::createIdentityQuaternion(),
@@ -101,8 +103,12 @@ bool EndEffectorIKSolverCore::endEffectorIkCallback(differential_kinematics::Tar
   if(!inverseKinematics(target_ee_pose, init_joint_vector_, init_root_pose,
                         req.orientation, req.full_body, req.tran_free_axis, req.rot_free_axis,
                         req.collision_avoidance, req.debug))
+  {
+    //srv_received_ = false;
     return false;
+  }
 
+  srv_received_ = true;
   return true;
 }
 
@@ -121,17 +127,14 @@ bool EndEffectorIKSolverCore::inverseKinematics(const tf::Transform& target_ee_p
 {
   /* reset path */
   discrete_path_.resize(0);
-
   /* important: link1(root) should be base link */
   planner_core_ptr_->getRobotModelPtr()->setBaselinkName(root_link_);
 
   /* declare the differential kinemtiacs const */
   pluginlib::ClassLoader<cost::Base>  cost_plugin_loader("differential_kinematics", "differential_kinematics::cost::Base");
   CostContainer cost_container;
-
   XmlRpc::XmlRpcValue costs;
   nhp_.getParam("differential_kinematics_cost", costs);
-
   for(auto cost: costs)
     {
       ROS_INFO_STREAM("inverse kinematics, add cost: " << cost.first);
@@ -188,10 +191,11 @@ bool EndEffectorIKSolverCore::inverseKinematics(const tf::Transform& target_ee_p
   planner_core_ptr_->setTargetJointVector(init_joint_vector);
 
   /* start the planning */
+
   if(planner_core_ptr_->solver(cost_container, constraint_container, debug))
-    {
+    {  
       /* revert to the correct base link ( which is not root_link = link1), to be suitable for the control system */
-      robot_model_ptr_->setBaselinkName(baselink_name_);
+
 
       for(int index = 0; index < planner_core_ptr_->getRootPoseSequence().size(); index++)
         {
@@ -254,13 +258,19 @@ void EndEffectorIKSolverCore::calcContinuousPath(double duration)
 void EndEffectorIKSolverCore::motionFunc()
 {
   ros::Time now_time = ros::Time::now();
-  br_.sendTransform(tf::StampedTransform(target_ee_pose_, now_time, "world", tf::resolve(tf_prefix_, "target_ee")));
+ // br_.sendTransform(tf::StampedTransform(target_ee_pose_, now_time, "world", tf::resolve(tf_prefix_, "target_ee")));
   //joints_ctrl_pub_.publish(joints_msg);
   tf::Transform end_link_ee_tf;
   end_link_ee_tf.setIdentity();
   end_link_ee_tf.setOrigin(tf::Vector3(planner_core_ptr_->getRobotModelPtr()->getLinkLength(), 0, 0));
 
   int rotor_num = planner_core_ptr_->getRobotModelPtr()->getRotorNum();
-  br_.sendTransform(tf::StampedTransform(end_link_ee_tf, now_time, tf::resolve(tf_prefix_, std::string("link") + std::to_string(rotor_num)), tf::resolve(tf_prefix_, "ee")));
+  //br_.sendTransform(tf::StampedTransform(end_link_ee_tf, now_time, tf::resolve(tf_prefix_, std::string("link") + std::to_string(rotor_num)), tf::resolve(tf_prefix_, "ee")));
+
+  if (now_time - srv_time_ > ros::Duration(5.0))
+  {
+    //ROS_INFO_STREAM("[IK solver] no service request received in 5.0 seconds, reset the service flag");
+    srv_received_ = false;
+  }
 }
 

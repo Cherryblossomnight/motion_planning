@@ -76,6 +76,13 @@ public:
 
   void calcContinuousPath(double duration);
 
+  bool isSrvReceived() const { return srv_received_; }
+
+  sensor_msgs::JointState getInitJointVector() const
+  {
+    return init_joint_vector_;
+  }
+
 private:
 
   ros::NodeHandle nh_;
@@ -97,9 +104,14 @@ private:
   tf::Transform target_ee_pose_;
   sensor_msgs::JointState init_joint_vector_;
 
+  ros::Time srv_time_;
+  bool srv_received_ = false;
+
   /* collision avoidance */
   bool collision_avoidance_;
   visualization_msgs::MarkerArray env_collision_;
+
+
 
   bool endEffectorIkCallback(differential_kinematics::TargetPose::Request  &req,
                              differential_kinematics::TargetPose::Response &res);

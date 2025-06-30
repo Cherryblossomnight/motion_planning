@@ -50,7 +50,7 @@ EndEffectorIKSolver::EndEffectorIKSolver(ros::NodeHandle nh, ros::NodeHandle nhp
   robot_baselink_odom_sub_ = nh_.subscribe("uav/baselink/odom", 1, &EndEffectorIKSolver::robotOdomCallback, this);
   robot_joint_states_sub_ = nh_.subscribe("joint_states", 1, &EndEffectorIKSolver::robotJointStatesCallback, this);
   control_terms_sub_ = nh_.subscribe("debug/pose/pid", 1, &EndEffectorIKSolver::controlTermsCallback, this);
-
+  ee_pos_sub_ = nh_.subscribe("end_effector_pose", 1, &EndEffectorIKSolver::endEffectorPoseCallback, this);
 
   joints_ctrl_pub_ = nh_.advertise<sensor_msgs::JointState>("joints_ctrl", 1);
   flight_nav_pub_ = nh_.advertise<aerial_robot_msgs::FlightNav>("uav/nav", 1);
@@ -61,13 +61,13 @@ EndEffectorIKSolver::EndEffectorIKSolver(ros::NodeHandle nh, ros::NodeHandle nhp
   /* robot model */
   nhp_.param("motion_type", motion_type_, 0);
   nhp_.param("robot_type", robot_type_, std::string("hydrus"));
-
-  if (robot_type_ == "hydrus" ) 
-    robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
-  else if (robot_type_ == "hydrus_xi") 
-    robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusTiltedRobotModel(true));
-  else if (robot_type_ == "dragon") 
-    robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new Dragon::HydrusLikeRobotModel(true));
+  robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
+  // if (robot_type_ == "hydrus" ) 
+  //   robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
+  // else if (robot_type_ == "hydrus_xi") 
+  //   robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
+  // else if (robot_type_ == "dragon") 
+  //   robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new Dragon::HydrusLikeRobotModel(true));
   // if (motion_type_ == motion_type::SE2) //SE2
   //   robot_model_ptr_ = boost::shared_ptr<HydrusRobotModel>(new HydrusRobotModel(true));
   // else //SE3
@@ -81,7 +81,7 @@ EndEffectorIKSolver::EndEffectorIKSolver(ros::NodeHandle nh, ros::NodeHandle nhp
       angle_min_vec_.push_back(joint_ptr->limits->lower);
       angle_max_vec_.push_back(joint_ptr->limits->upper);
     }
-  end_effector_ik_solver_core_ = boost::shared_ptr<EndEffectorIKSolverCore>(new EndEffectorIKSolverCore(nh_, ros::NodeHandle(nhp_, "end_effector"), robot_model_ptr_, false));
+  end_effector_ik_solver_core_ = boost::shared_ptr<EndEffectorIKSolverCore>(new EndEffectorIKSolverCore(nh_, nhp_, robot_model_ptr_, true));
   /* navigation timer */
   navigate_timer_ = nh_.createTimer(ros::Duration(1.0 / controller_freq_), &EndEffectorIKSolver::process, this);
   reset();
@@ -124,8 +124,6 @@ void EndEffectorIKSolver::reset()
   return_flag_ = false;
   state_index_ = 0;
   max_joint_vel_ = 0;
-
-
 }
 
 // void EndEffectorIKSolver::startNavigate()
@@ -211,9 +209,18 @@ void EndEffectorIKSolver::reset()
 
 
 void EndEffectorIKSolver::process(const ros::TimerEvent& event)
-{
+{if(end_effector_ik_solver_core_->isSrvReceived())
+  {
   /* execute */
-  pathExecute();
+    //pathSearch();
+    
+    tf::Quaternion q; q.setRPY(0.0, 0.0, 3.14);
+    tf::Transform target_ee_pose(q, tf::Vector3(-0.6, 0.6, 0.0));
+    tf::Transform init_root_pose;
+    init_root_pose.setIdentity();
+    end_effector_ik_solver_core_->inverseKinematics(target_ee_pose, end_effector_ik_solver_core_->getInitJointVector(), init_root_pose, true, true, std::string(""), std::string(""), false, false);
+    pathExecute();
+  }
 }
 
 void EndEffectorIKSolver::pathSearch()
@@ -296,58 +303,64 @@ void EndEffectorIKSolver::pathSearch()
 
 void EndEffectorIKSolver::pathExecute()
 {
+   
+  double reset_pose_period;
+  nhp_.param("reset_pose_period", reset_pose_period, 5.0);
+  end_effector_ik_solver_core_->calcContinuousPath(reset_pose_period);
+  //if(end_effector_ik_solver_core_->isSrvReceived())
   pathExecute(end_effector_ik_solver_core_->getDiscretePath(), end_effector_ik_solver_core_->getContinuousPath());
+  
 }
 
 void EndEffectorIKSolver::pathExecute(const std::vector<MultilinkState>& discrete_path, boost::shared_ptr<ContinuousPathGenerator> continuous_path)
 {
-  if(!move_flag_)
-    {
-      /* final process: return */
-      if (return_flag_)
-        {
-          double t = ros::Time::now().toSec() - start_return_time_;
-          if(t < return_delay_ * 2 / 3)
-            {
-              spinal::DesireCoord att_msg;
-              double rate = 1 - t / (return_delay_ * 2 / 3);
-              att_msg.roll = rate * continuous_path->getPositionVector(continuous_path->getPathDuration() + 1.0 / controller_freq_)[3];
-              att_msg.pitch = rate * continuous_path->getPositionVector(continuous_path->getPathDuration() + 1.0 / controller_freq_)[4];
-              se3_roll_pitch_nav_pub_.publish(att_msg);
-              ROS_INFO_THROTTLE(1.0, "set robot level and the init joint state ");
-            }
+  // if(!move_flag_)
+  //   {
+  //     /* final process: return */
+  //     if (return_flag_)
+  //       {
+  //         double t = ros::Time::now().toSec() - start_return_time_;
+  //         if(t < return_delay_ * 2 / 3)
+  //           {
+  //             spinal::DesireCoord att_msg;
+  //             double rate = 1 - t / (return_delay_ * 2 / 3);
+  //             att_msg.roll = rate * continuous_path->getPositionVector(continuous_path->getPathDuration() + 1.0 / controller_freq_)[3];
+  //             att_msg.pitch = rate * continuous_path->getPositionVector(continuous_path->getPathDuration() + 1.0 / controller_freq_)[4];
+  //             se3_roll_pitch_nav_pub_.publish(att_msg);
+  //             ROS_INFO_THROTTLE(1.0, "set robot level and the init joint state ");
+  //           }
 
-          if(t > return_delay_)
-            {
-              /* set SE2 goal (return) position */
-              if (nhp_.hasParam("final_pos_x") && nhp_.hasParam("final_pos_y") && nhp_.hasParam("final_yaw"))
-                {
-                  double final_pos_x, final_pos_y, final_yaw;
-                  nhp_.getParam("final_pos_x", final_pos_x);
-                  nhp_.getParam("final_pos_y", final_pos_y);
-                  nhp_.getParam("final_yaw", final_yaw);
+  //         if(t > return_delay_)
+  //           {
+  //             /* set SE2 goal (return) position */
+  //             if (nhp_.hasParam("final_pos_x") && nhp_.hasParam("final_pos_y") && nhp_.hasParam("final_yaw"))
+  //               {
+  //                 double final_pos_x, final_pos_y, final_yaw;
+  //                 nhp_.getParam("final_pos_x", final_pos_x);
+  //                 nhp_.getParam("final_pos_y", final_pos_y);
+  //                 nhp_.getParam("final_yaw", final_yaw);
 
-                  aerial_robot_msgs::FlightNav nav_msg;
-                  nav_msg.header.frame_id = std::string("/world");
-                  nav_msg.header.stamp = ros::Time::now();
-                  /* x & y */
-                  nav_msg.control_frame = nav_msg.WORLD_FRAME;
-                  nav_msg.target = nav_msg.COG;
-                  nav_msg.pos_xy_nav_mode = nav_msg.POS_MODE;
-                  nav_msg.target_pos_x = final_pos_x;
-                  nav_msg.target_pos_y = final_pos_y;
+  //                 aerial_robot_msgs::FlightNav nav_msg;
+  //                 nav_msg.header.frame_id = std::string("/world");
+  //                 nav_msg.header.stamp = ros::Time::now();
+  //                 /* x & y */
+  //                 nav_msg.control_frame = nav_msg.WORLD_FRAME;
+  //                 nav_msg.target = nav_msg.COG;
+  //                 nav_msg.pos_xy_nav_mode = nav_msg.POS_MODE;
+  //                 nav_msg.target_pos_x = final_pos_x;
+  //                 nav_msg.target_pos_y = final_pos_y;
 
-                  /* yaw */
-                  nav_msg.yaw_nav_mode = nav_msg.POS_MODE;
-                  nav_msg.target_yaw = final_yaw;
-                  flight_nav_pub_.publish(nav_msg);
-                }
+  //                 /* yaw */
+  //                 nav_msg.yaw_nav_mode = nav_msg.POS_MODE;
+  //                 nav_msg.target_yaw = final_yaw;
+  //                 flight_nav_pub_.publish(nav_msg);
+  //               }
 
-              reset();
-            }
-        }
-      return;
-    }
+  //             reset();
+  //           }
+  //       }
+  //     return;
+  //   }
 
   int joint_num = robot_model_ptr_->getLinkJointIndices().size();
   moveit_msgs::DisplayRobotState display_robot_state;
@@ -356,7 +369,6 @@ void EndEffectorIKSolver::pathExecute(const std::vector<MultilinkState>& discret
   if(discrete_path_debug_flag_)
     {
       if(state_index_ == discrete_path.size()) return; //debug
-
 
       /* debug */
       {
@@ -497,7 +509,7 @@ void EndEffectorIKSolver::pathExecute(const std::vector<MultilinkState>& discret
       nav_msg.yaw_nav_mode = nav_msg.POS_VEL_MODE;
       nav_msg.target_yaw = des_pos[5];
       nav_msg.target_omega_z = des_vel[5];
-      flight_nav_pub_.publish(nav_msg);
+      //flight_nav_pub_.publish(nav_msg);
 
       /* roll & pitch */
       if(motion_type_ == motion_type::SE3)
@@ -563,3 +575,29 @@ void EndEffectorIKSolver::robotJointStatesCallback(const sensor_msgs::JointState
   real_machine_connect_ = true;
   joint_state_ = robot_model_ptr_->jointMsgToKdl(*joints_msg);
 }
+
+void EndEffectorIKSolver::endEffectorPoseCallback(const geometry_msgs::PoseConstPtr& msg)
+{
+  // real_machine_connect_ = true;
+  // end_effector_pose_ = *msg;
+  end_effector_ik_solver_core_->setEndEffectorPose("link4",
+                     tf::Transform(tf::createIdentityQuaternion(),
+                                   tf::Vector3(0.6, 0, 0)));
+
+  tf::Quaternion q; q.setRPY(0.0, 0.0, 0.0);
+  tf::Transform target_ee_pose(q, tf::Vector3(msg->position.x, msg->position.y, msg->position.z));
+  tf::Transform init_root_pose(q, tf::Vector3(0.0, 0.0, 0.0));;
+  std::cout<<"eepose"<<msg->position.x<<","<<msg->position.y<<","<<msg->position.z<<std::endl;
+  sensor_msgs::JointState init_joint_vector;
+  init_joint_vector.name.push_back("joint1");
+  init_joint_vector.name.push_back("joint2");
+  init_joint_vector.name.push_back("joint3");
+  init_joint_vector.position.push_back(1.2);
+  init_joint_vector.position.push_back(1.2);
+  init_joint_vector.position.push_back(-0.3);
+  end_effector_ik_solver_core_->inverseKinematics(target_ee_pose, init_joint_vector, init_root_pose, false, true, std::string(""), std::string(""), false, false);
+  
+  pathExecute();
+}
+
+
